@@ -1,0 +1,70 @@
+.searchContainer {
+    display: flex;
+    flex: 1;
+    max-width: 600px;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.locationWrapper {
+    flex: 0 0 auto;
+}
+
+.locationSelect {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    appearance: none;
+}
+
+.locationSelect:focus, .locationSelect:hover {
+    border-color: var(--primary-color);
+    background: rgba(0, 243, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+}
+
+.locationSelect option {
+    background: #111;
+    color: #fff;
+}
+
+.searchWrapper {
+    flex: 1;
+    position: relative;
+}
+
+.searchInput {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(0, 243, 255, 0.2);
+    border-radius: var(--radius);
+    padding: 10px 16px;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-family: 'Outfit', sans-serif;
+    outline: none;
+    transition: all 0.3s ease;
+    letter-spacing: 1px;
+}
+
+.searchInput:focus {
+    border-color: var(--primary-color);
+    background: rgba(0, 243, 255, 0.05);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+}
+
+@media (max-width: 768px) {
+    .searchContainer {
+        order: 3;
+        flex: 1 1 100%;
+        max-width: 100%;
+        margin-top: 0.5rem;
+    }
+}

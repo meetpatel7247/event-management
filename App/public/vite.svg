@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100">
+  <defs>
+    <!-- Vibrant Gradients matching the user's image -->
+    <linearGradient id="g-orange" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff7f00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ff4d00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="g-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00c3ff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0077ff;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="g-green" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#76ff03;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00b300;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="g-grey" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#e0e0e0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#9e9e9e;stop-opacity:1" />
+    </linearGradient>
+
+    <!-- Drop Shadow for 3D effect -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="1" />
+      <feOffset dx="1" dy="1" result="offsetblur" />
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3" />
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Logo Icon Group -->
+  <g transform="translate(5, 10) scale(0.85)" filter="url(#shadow)">
+    <!-- Orange Arrow (Top-Left) -->
+    <path fill="url(#g-orange)" d="M50 50 L50 15 C20 15 15 45 15 50 L30 50 L10 80 L-10 50 L5 50 C5 35 25 30 50 30 Z" transform="rotate(-90, 50, 50) translate(-10, -10)" />
+    
+    <!-- Blue Arrow (Top-Right) -->
+    <path fill="url(#g-blue)" d="M50 50 L50 15 C20 15 15 45 15 50 L30 50 L10 80 L-10 50 L5 50 C5 35 25 30 50 30 Z" transform="rotate(0, 50, 50) translate(10, -10)" />
+
+    <!-- Green Arrow (Bottom-Right) -->
+    <path fill="url(#g-green)" d="M50 50 L50 15 C20 15 15 45 15 50 L30 50 L10 80 L-10 50 L5 50 C5 35 25 30 50 30 Z" transform="rotate(90, 50, 50) translate(10, 10)" />
+
+    <!-- Grey Arrow (Bottom-Left) -->
+    <path fill="url(#g-grey)" d="M50 50 L50 15 C20 15 15 45 15 50 L30 50 L10 80 L-10 50 L5 50 C5 35 25 30 50 30 Z" transform="rotate(180, 50, 50) translate(-10, 10)" />
+  </g>
+
+  <!-- Text Group -->
+  <g transform="translate(110, 78)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-weight="900" font-size="75" fill="#1e2139">DEV</text>
+    <text x="5" y="20" font-family="Arial, sans-serif" font-weight="bold" font-style="italic" font-size="15" fill="#1e2139" letter-spacing="1">IT Simplified</text>
+  </g>
+</svg>

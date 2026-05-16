@@ -1,0 +1,168 @@
+@keyframes urgentPulse {
+    0% {
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), inset 0 0 0 1px rgba(239, 68, 68, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.8), inset 0 0 0 2px rgba(239, 68, 68, 0.5);
+    }
+
+    100% {
+        box-shadow: 0 0 10px rgba(239, 68, 68, 0.4), inset 0 0 0 1px rgba(239, 68, 68, 0.2);
+    }
+}
+
+.urgentCard {
+    min-width: 250px;
+    max-width: 350px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    border-radius: 12px;
+    background: rgba(20, 20, 30, 0.8);
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+    animation: urgentPulse 2s infinite ease-in-out;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.urgentCard:hover {
+    transform: translateY(-8px) scale(1.02);
+}
+
+@keyframes pulseBadge {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.urgentBadge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: pulseBadge 1.5s infinite;
+}
+
+.bookingCard {
+    min-width: 250px;
+    max-width: 350px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    border-radius: 12px;
+    background: rgba(30, 30, 40, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.bookingCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.pastCard {
+    opacity: 0.6;
+    filter: grayscale(0.5);
+}
+
+.pastCard:hover {
+    opacity: 0.8;
+    filter: grayscale(0.2);
+}
+
+.cardImageContainer {
+    height: 160px;
+    background: #222;
+    position: relative;
+    overflow: hidden;
+}
+
+.cardImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.bookingCard:hover .cardImage,
+.urgentCard:hover .cardImage {
+    transform: scale(1.05);
+}
+
+.cardContent {
+    padding: 1.5rem;
+}
+
+.eventTitle {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.eventMeta {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+}
+
+.statusRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding-top: 1rem;
+    margin-top: 0.5rem;
+}
+
+.quantityBadge {
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.statusBadge {
+    padding: 4px 12px;
+    background: rgba(52, 211, 153, 0.15);
+    color: #34d399;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.statusBadge.past {
+    background: rgba(156, 163, 175, 0.15);
+    color: #9ca3af;
+}
+
+.bookingId {
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.3);
+    font-family: monospace;
+}

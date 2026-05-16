@@ -1,0 +1,122 @@
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+require("dotenv").config();
+const mongoose = require('mongoose');
+const connectDB = require('./config/db');
+
+const eventRoutes = require('./routes/eventRoutes');
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
+const UserModel = require('./models/userModel');
+
+// Core Express Setup
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+const apiPrefix = process.env.API_PREFIX || '/api/v1';
+
+// Health check and root
+app.get('/', (req, res) => {
+  res.json({
+    message: 'Event Management API',
+    status: 'Running',
+    try: `${apiPrefix}/health`,
+  });
+});
+
+app.get(`${apiPrefix}/health`, (req, res) => {
+  const actualDbStatus = mongoose.connection.readyState === 1 ? 'Connected' : 'Disc+++++onnected';
+  
+  res.json({ 
+    status: 'ok', 
+    message: 'Event Management Backend is running',
+    apiPrefix,
+    database: actualDbStatus,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+app.get(`${apiPrefix}/status`, (req, res) => {
+  res.json({
+    message: 'Event Management API Overview',
+    prefix: apiPrefix,
+    endpoints: {
+      auth: { path: `${apiPrefix}/auth`, status: 'Public', description: 'Registration and Login' },
+      users: { path: `${apiPrefix}/users`, status: 'JWT Secured', description: 'User profile and management' },
+      events: { path: `${apiPrefix}/events`, status: 'JWT Secured', description: 'Event discovery and creation' },
+      bookings: { path: `${apiPrefix}/bookings`, status: 'JWT Secured', description: 'Ticket purchases and history' },
+    }
+  });
+});
+
+// Mount API routes
+app.use(`${apiPrefix}/auth`, authRoutes);
+app.use(`${apiPrefix}/users`, userRoutes);
+app.use(`${apiPrefix}/events`, eventRoutes);
+app.use(`${apiPrefix}/bookings`, bookingRoutes);
+
+// Initial seed
+async function seedAdminFromEnv() {
+  const email = (process.env.TEST_EMAIL || 'meetjpatel2406@gmail.com').toLowerCase();
+  const password = 'Meet@1234'; 
+  try {
+    const existing = await UserModel.findOne({ email });
+    if (existing) return;
+    
+    await UserModel.create({
+      email,
+      password,
+      name: 'Initial Admin',
+      role: 'admin',
+    });
+    console.log(`Created initial admin user: ${email}`);
+  } catch (error) {
+    console.warn('Seed error:', error.message);
+  }
+}
+
+// Global Error Handler
+app.use((err, _req, res, next) => {
+  console.error(err.stack);
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
+  res.status(statusCode).json({
+    success: false,
+    message,
+  });
+});
+
+// Start server
+const startServer = async () => {
+  try {
+    // Connect to Database
+    await connectDB();
+    
+    // Seed and Listen
+    await seedAdminFromEnv();
+    const server = app.listen(PORT, () => {
+      console.log(`Backend API listening on port ${PORT}`);
+    });
+    
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use.`);
+        process.exit(1);
+      }
+      throw err;
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
+
+startServer();

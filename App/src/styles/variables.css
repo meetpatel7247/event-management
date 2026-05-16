@@ -1,0 +1,30 @@
+:root {
+    /* Neon Palette */
+    --primary-color: #00f3ff;
+    --primary-hover: #00c2cc;
+    --secondary-color: #ff00ff;
+    --accent-color: #bc13fe;
+    --success-color: #0aff00;
+    --warning-color: #ffeb3b;
+
+    /* Backgrounds */
+    --bg-dark: #050505;
+    --bg-card: #0a0a0f;
+    --bg-input: #12121a;
+
+    /* Text */
+    --text-main: #e0faff;
+    --text-muted: #8b9bb4;
+    --text-glow: 0 0 10px rgba(0, 243, 255, 0.5);
+
+    /* Borders & Shadows */
+    --border-color: #00f3ff;
+    --shadow-lg: 0 0 20px rgba(0, 243, 255, 0.15);
+    --shadow-glow: 0 0 15px rgba(0, 243, 255, 0.6), 0 0 30px rgba(0, 243, 255, 0.4);
+    --shadow-card: 0 0 10px rgba(188, 19, 254, 0.2);
+
+    /* Layout */
+    --max-width: 100%;
+    --nav-height: 80px;
+    --radius: 8px;
+}
