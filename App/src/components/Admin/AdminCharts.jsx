@@ -41,7 +41,7 @@ export function LineChart({ data, valueKey, labelKey }) {
         {tip && (
           <div className="adm-line-tip">
             <div className="adm-tip-label">{tip.label}</div>
-            <div className="adm-tip-val">${tip.value.toLocaleString()}</div>
+            <div className="adm-tip-val">₹{tip.value.toLocaleString()}</div>
           </div>
         )}
         <div className="adm-line-xlabels">

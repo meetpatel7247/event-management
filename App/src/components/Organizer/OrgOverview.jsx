@@ -18,10 +18,10 @@ export default function OrgOverview({
           </div>
         </div>
         <div className="org-stat-card">
-          <div className="org-stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>$</div>
+          <div className="org-stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>₹</div>
           <div>
             <div className="org-stat-label">Total Revenue</div>
-            <div className="org-stat-value" style={{ color: '#10b981' }}>${totalRevenue.toLocaleString()}</div>
+            <div className="org-stat-value" style={{ color: '#10b981' }}>₹{totalRevenue.toLocaleString()}</div>
             <div className="org-stat-sub">From ticket sales</div>
           </div>
         </div>
@@ -73,7 +73,7 @@ export default function OrgOverview({
                     <span className="org-recent-date">{new Date(ev.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                   </div>
                   <div className="org-recent-stat"><span className="org-recent-stat-label">Sold</span><strong>{sold}</strong></div>
-                  <div className="org-recent-stat"><span className="org-recent-stat-label">Revenue</span><strong style={{ color: '#10b981' }}>${rev.toLocaleString()}</strong></div>
+                  <div className="org-recent-stat"><span className="org-recent-stat-label">Revenue</span><strong style={{ color: '#10b981' }}>₹{rev.toLocaleString()}</strong></div>
                   {statusBadge(ev)}
                 </div>
               );

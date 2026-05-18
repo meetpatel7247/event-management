@@ -9,10 +9,10 @@ export default function AdminOverview({
     <div className="adm-panel">
       <div className="adm-stats-grid">
         <div className="adm-stat-card">
-          <div className="adm-stat-icon" style={{ background:'rgba(16,185,129,0.15)', color:'#10b981' }}>$</div>
+          <div className="adm-stat-icon" style={{ background:'rgba(16,185,129,0.15)', color:'#10b981' }}>₹</div>
           <div>
             <div className="adm-stat-label">Total Platform Revenue</div>
-            <div className="adm-stat-value" style={{ color:'#10b981' }}>${totalRevenue.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})}</div>
+            <div className="adm-stat-value" style={{ color:'#10b981' }}>₹{totalRevenue.toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1})}</div>
             <div className="adm-stat-chip" style={{ color: revenueGrowth >= 0 ? '#10b981' : '#ef4444' }}>
               {revenueGrowth >= 0 ? '+' : ''}{revenueGrowth}%
             </div>

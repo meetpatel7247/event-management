@@ -35,7 +35,7 @@ const EventTable = ({ events, onDelete, onEdit }) => {
                             <td style={{ padding: '1rem' }}>{event.title}</td>
                             <td style={{ padding: '1rem' }}>{new Date(event.date).toLocaleDateString()}</td>
                             <td style={{ padding: '1rem' }}>{event.location}</td>
-                            <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>${event.price}</td>
+                            <td style={{ padding: '1rem', color: 'var(--primary-color)', fontWeight: 'bold' }}>₹{event.price}</td>
                             <td style={{ padding: '1rem', color: 'var(--secondary-color)', fontWeight: 'bold' }}>{event.sold || 0}</td>
                             <td style={{ padding: '1rem', display: 'flex', gap: '0.5rem' }}>
                                 <button

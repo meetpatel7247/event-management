@@ -72,8 +72,20 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
                 </div>
                 <div style={{ padding: '1rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <input className="premium-input" name="location" value={formData.location} placeholder="Location" onChange={handleChange} required />
-                    <input className="premium-input" name="price" type="number" value={formData.price} placeholder="Price ($)" onChange={handleChange} required />
+                    <input className="premium-input" name="price" type="number" value={formData.price} placeholder="Normal Price (₹)" onChange={handleChange} required />
                 </div>
+                {formData.price && (
+                    <div style={{ paddingBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#93c5fd' }}>
+                            ⭐ <strong>VIP Price:</strong> ₹{Number(formData.price) + 300}
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '2px' }}>Normal + ₹300 (auto)</div>
+                        </div>
+                        <div style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.85rem', color: '#fcd34d' }}>
+                            👑 <strong>VVIP Price:</strong> ₹{Number(formData.price) + 600}
+                            <div style={{ fontSize: '0.75rem', opacity: 0.7, marginTop: '2px' }}>Normal + ₹600 (auto)</div>
+                        </div>
+                    </div>
+                )}
                 <div style={{ paddingBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                     <input className="premium-input" name="offerMinTickets" type="number" value={formData.offerMinTickets} placeholder="Min Tickets for Offer (e.g. 3)" onChange={handleChange} />
                     <input className="premium-input" name="offerDiscount" type="number" value={formData.offerDiscount} placeholder="Discount % (e.g. 20)" onChange={handleChange} />

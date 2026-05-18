@@ -32,6 +32,14 @@ const EventSchema = new mongoose.Schema({
     required: [true, 'Please add a price'],
     default: 0,
   },
+  vipPrice: {
+    type: Number,
+    default: 0,
+  },
+  vvipPrice: {
+    type: Number,
+    default: 0,
+  },
   availableSeats: {
     type: Number,
     default: 100,

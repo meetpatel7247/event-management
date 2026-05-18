@@ -7,7 +7,7 @@ const BookingPanel = ({ event, quantity, setQuantity, discountInfo, handleBook }
             <div className={styles.priceHeader}>
                 <div>
                     <div className={styles.priceLabel}>Price per ticket</div>
-                    <div className={styles.priceValue}>${event.price}</div>
+                    <div className={styles.priceValue}>₹{event.price}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <div className={styles.priceLabel}>Organizer</div>
@@ -38,13 +38,13 @@ const BookingPanel = ({ event, quantity, setQuantity, discountInfo, handleBook }
 
             {discountInfo.discountAmount > 0 && (
                 <div className={styles.discountMsg}>
-                    Offer Discount Applied! (Saved ${discountInfo.discountAmount})
+                    Offer Discount Applied! (Saved ₹{discountInfo.discountAmount})
                 </div>
             )}
 
             <div className={styles.totalRow}>
                 <span className={styles.totalLabel}>Total</span>
-                <span className={styles.totalValue}>${discountInfo.totalPrice}</span>
+                <span className={styles.totalValue}>₹{discountInfo.totalPrice}</span>
             </div>
 
             <button

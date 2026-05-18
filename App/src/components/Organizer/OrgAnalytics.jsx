@@ -18,7 +18,7 @@ export default function OrgAnalytics({ events, ticketsByEvent, bestEvent, mostPo
               <div>
                 <div className="org-stat-label">Best Performing Event</div>
                 <div className="org-stat-value" style={{ fontSize: '1.1rem' }}>{bestEvent?.label || '—'}</div>
-                <div className="org-stat-sub" style={{ color: '#10b981' }}>${(bestEvent?.revenue || 0).toLocaleString()}</div>
+                <div className="org-stat-sub" style={{ color: '#10b981' }}>₹{(bestEvent?.revenue || 0).toLocaleString()}</div>
               </div>
             </div>
             <div className="org-stat-card">
@@ -30,10 +30,10 @@ export default function OrgAnalytics({ events, ticketsByEvent, bestEvent, mostPo
               </div>
             </div>
             <div className="org-stat-card">
-              <div className="org-stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>$</div>
+              <div className="org-stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>₹</div>
               <div>
                 <div className="org-stat-label">Avg Ticket Price</div>
-                <div className="org-stat-value" style={{ fontSize: '1.1rem' }}>${avgTicketPrice}</div>
+                <div className="org-stat-value" style={{ fontSize: '1.1rem' }}>₹{avgTicketPrice}</div>
                 <div className="org-stat-sub">Across all events</div>
               </div>
             </div>

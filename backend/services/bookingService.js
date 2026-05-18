@@ -1,7 +1,7 @@
 const BookingModel = require('../models/bookingModel');
 const EventModel = require('../models/eventModel');
 
-async function createBooking({ userId, eventId, quantity, totalPrice }) {
+async function createBooking({ userId, eventId, quantity, totalPrice, ticketType }) {
   const event = await EventModel.findById(eventId);
   if (!event) {
     const err = new Error('Event not found');
@@ -30,6 +30,7 @@ async function createBooking({ userId, eventId, quantity, totalPrice }) {
     event: eventId,
     quantity,
     totalPrice,
+    ticketType: ticketType || 'Normal',
   });
 
   // Atomically decrement seats so we avoid full document validation

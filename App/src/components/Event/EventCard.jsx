@@ -99,7 +99,7 @@ const EventCard = ({ event, isGrid = false }) => {
                 )}
                 <div style={{ marginTop: 'auto' }}>
                     <div className={styles.price}>
-                        ${event.price}
+                        ₹{event.price}
                     </div>
                     <button
                         className={`premium-button ${styles.bookBtn}`}

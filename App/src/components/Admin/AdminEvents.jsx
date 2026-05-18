@@ -52,7 +52,7 @@ export default function AdminEvents({
                   <td>{ev.organizerName || ev.organizerId?.name || '—'}</td>
                   <td>{new Date(ev.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
                   <td><StatusBadge approved={ev.isApproved} past={isPast} /></td>
-                  <td style={{ color:'#10b981', fontWeight:600 }}>${rev.toFixed(1)}</td>
+                  <td style={{ color:'#10b981', fontWeight:600 }}>₹{rev.toFixed(1)}</td>
                   <td>
                     <div className="adm-row-actions">
                       <button className="adm-icon-btn adm-icon-view" title="View" onClick={() => navigate(`/event/${ev._id}`)}>👁</button>

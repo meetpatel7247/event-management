@@ -4,9 +4,9 @@ const eventService = require('../services/eventService');
 
 async function createBooking(req, res, next) {
   try {
-    const { eventId, quantity, totalPrice, guestName, guestEmail } = req.body;
+    const { eventId, quantity, totalPrice, guestName, guestEmail, ticketType } = req.body;
     const userId = req.user.userId;
-    const booking = await bookingService.createBooking({ userId, eventId, quantity, totalPrice });
+    const booking = await bookingService.createBooking({ userId, eventId, quantity, totalPrice, ticketType });
     
     let emailPreviewUrl = null;
     if (guestName && guestEmail) {

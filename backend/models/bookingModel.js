@@ -20,6 +20,11 @@ const BookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
+  ticketType: {
+    type: String,
+    enum: ['Normal', 'VIP', 'VVIP'],
+    default: 'Normal',
+  },
   bookingDate: {
     type: Date,
     default: Date.now,

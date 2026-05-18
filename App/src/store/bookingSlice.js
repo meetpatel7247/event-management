@@ -10,6 +10,7 @@ const initialState = {
     quantity: 1,
     totalPrice: 0,
     discountAmount: 0,
+    ticketType: 'Normal',
 };
 
 /**
@@ -24,11 +25,12 @@ const bookingSlice = createSlice({
          * Commits the pending booking details to global state before forwarding to checkout.
          */
         setBookingDetails: (state, action) => {
-            const { event, quantity, totalPrice, discountAmount } = action.payload;
+            const { event, quantity, totalPrice, discountAmount, ticketType } = action.payload;
             state.bookingEvent = event;
             state.quantity = quantity;
             state.totalPrice = totalPrice;
             state.discountAmount = discountAmount;
+            state.ticketType = ticketType || 'Normal';
         },
         /**
          * Scraps the session booking data (used upon successful checkout or cancellation).
@@ -38,6 +40,7 @@ const bookingSlice = createSlice({
             state.quantity = 1;
             state.totalPrice = 0;
             state.discountAmount = 0;
+            state.ticketType = 'Normal';
         },
     },
 });
