@@ -116,6 +116,16 @@ const Admin = () => {
     } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
   };
 
+  const handleResetData = async () => {
+    if (!window.confirm('⚠️ This will permanently delete ALL ticket/booking records and restore event seat counts. Are you sure?')) return;
+    if (!window.confirm('🚨 Final confirmation: This action CANNOT be undone. Proceed?')) return;
+    try {
+      await adminApi.resetBookings();
+      toast.success('✅ All ticket data reset successfully!');
+      refresh(false);
+    } catch (e) { toast.error(e.response?.data?.message || 'Reset failed'); }
+  };
+
   /* ── filtered lists ── */
   const filteredEvents = useMemo(() => {
     let list = events;
@@ -151,6 +161,13 @@ const Admin = () => {
           <h1 className="adm-title">Admin Panel</h1>
           <p className="adm-subtitle">Manage platform operations and user activities</p>
         </div>
+        <button
+          className="adm-reset-btn"
+          onClick={handleResetData}
+          title="Delete all bookings and restore event seat counts"
+        >
+          🗑️ Reset Ticket Data
+        </button>
       </div>
 
       {/* TABS */}

@@ -25,6 +25,18 @@ const EventCard = ({ event, isGrid = false }) => {
     const seededFallback = `https://picsum.photos/seed/${seed}/800/450`;
     const imageSrc = !imgErrored && event?.image ? event.image : seededFallback;
 
+    // ── Like state (persisted per event in localStorage) ──────────────
+    const likeKey = `liked_${event._id}`;
+    const [liked, setLiked] = useState(() => localStorage.getItem(likeKey) === 'true');
+    const [likeCount, setLikeCount] = useState(() => {
+        const stored = parseInt(localStorage.getItem(`likeCount_${event._id}`), 10);
+        return isNaN(stored) ? (event.likes || 0) : stored;
+    });
+    const [likeBounce, setLikeBounce] = useState(false);
+
+    // ── Share feedback state ───────────────────────────────────────────
+    const [shareCopied, setShareCopied] = useState(false);
+
     /**
      * Prevents the click from bubbling to the parent card, checks auth,
      * seeds the Redux store with the target event, and pushes the booking route.
@@ -44,6 +56,42 @@ const EventCard = ({ event, isGrid = false }) => {
         }));
 
         navigate('/booking');
+    };
+
+    /** Toggle like with animation and localStorage persistence */
+    const handleLike = (e) => {
+        e.stopPropagation();
+        const newLiked = !liked;
+        const newCount = newLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
+        setLiked(newLiked);
+        setLikeCount(newCount);
+        setLikeBounce(true);
+        setTimeout(() => setLikeBounce(false), 400);
+        localStorage.setItem(likeKey, String(newLiked));
+        localStorage.setItem(`likeCount_${event._id}`, String(newCount));
+    };
+
+    /** Share via native API or copy link to clipboard */
+    const handleShare = async (e) => {
+        e.stopPropagation();
+        const appBase = import.meta.env.VITE_APP_URL || window.location.origin;
+        const shareUrl = `${appBase}/event/${event._id}`;
+        const shareData = {
+            title: event.title,
+            text: `Check out this event: ${event.title} on ${new Date(event.date).toLocaleDateString()}`,
+            url: shareUrl,
+        };
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+            } else {
+                await navigator.clipboard.writeText(shareUrl);
+                setShareCopied(true);
+                setTimeout(() => setShareCopied(false), 2000);
+            }
+        } catch {
+            // User cancelled share or clipboard unavailable — silently ignore
+        }
     };
 
     return (
@@ -73,6 +121,29 @@ const EventCard = ({ event, isGrid = false }) => {
                     background: 'linear-gradient(to top, var(--bg-card), transparent)',
                     opacity: 0.6
                 }} />
+
+                {/* ── Like & Share badges on the image top-right ── */}
+                <div className={styles.cardActions} onClick={e => e.stopPropagation()}>
+                    {/* Share */}
+                    <button
+                        className={`${styles.actionBtn} ${shareCopied ? styles.actionBtnCopied : ''}`}
+                        onClick={handleShare}
+                        title="Share this event"
+                        aria-label="Share event"
+                    >
+                        {shareCopied ? '✅' : '🔗'}
+                    </button>
+
+                    {/* Like */}
+                    <button
+                        className={`${styles.actionBtn} ${liked ? styles.actionBtnLiked : ''} ${likeBounce ? styles.bounce : ''}`}
+                        onClick={handleLike}
+                        title={liked ? 'Unlike' : 'Like this event'}
+                        aria-label={liked ? 'Unlike event' : 'Like event'}
+                    >
+                        {liked ? '❤️' : '🤍'}
+                    </button>
+                </div>
             </div>
             <div className={styles.contentContainer}>
                 <div className={styles.date}>

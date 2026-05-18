@@ -9,6 +9,7 @@ router.post('/', bookingController.createBooking);
 router.get('/my-bookings', bookingController.listUserBookings);
 router.get('/all', bookingController.listAllBookings); // Admin feature
 router.get('/organizer-bookings', bookingController.listOrganizerBookings); // Organizer sees their events' bookings
+router.delete('/reset', bookingController.resetAllBookings); // Admin: reset all ticket data
 
 module.exports = router;
 

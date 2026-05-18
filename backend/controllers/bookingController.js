@@ -1,6 +1,8 @@
 const bookingService = require('../services/bookingService');
 const emailService = require('../services/emailService');
 const eventService = require('../services/eventService');
+const BookingModel = require('../models/bookingModel');
+const EventModel   = require('../models/eventModel');
 
 async function createBooking(req, res, next) {
   try {
@@ -52,10 +54,41 @@ async function listOrganizerBookings(req, res, next) {
   }
 }
 
+/** Admin only – deletes every booking and restores event seat counts */
+async function resetAllBookings(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+
+    // Gather per-event ticket counts before deletion
+    const bookings = await BookingModel.find({}, 'event quantity');
+    const seatMap = {};
+    bookings.forEach(b => {
+      const id = String(b.event);
+      seatMap[id] = (seatMap[id] || 0) + (b.quantity || 0);
+    });
+
+    // Delete all bookings
+    await BookingModel.deleteMany({});
+
+    // Restore seats for every affected event
+    const ops = Object.entries(seatMap).map(([eventId, qty]) =>
+      EventModel.updateOne({ _id: eventId }, { $inc: { availableSeats: qty } })
+    );
+    await Promise.all(ops);
+
+    res.json({ message: 'All ticket / booking data has been reset successfully.' });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   createBooking,
   listUserBookings,
   listAllBookings,
   listOrganizerBookings,
+  resetAllBookings,
 };
 

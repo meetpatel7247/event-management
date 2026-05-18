@@ -103,6 +103,11 @@ export const adminApi = {
     const response = await api.put(`/events/${id}`, { isApproved: true });
     return response.data;
   },
+  /** Admin: delete ALL bookings and restore event seat counts */
+  resetBookings: async () => {
+    const response = await api.delete('/bookings/reset');
+    return response.data;
+  },
 };
 
 export const userApi = {
