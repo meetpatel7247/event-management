@@ -1,18 +1,36 @@
-import React from 'react';
-import { LineChart } from './OrgCharts';
+import React, { useState } from 'react';
+import { TicketSparkChart } from './OrgCharts';
+import ChartCard from '../charts/ChartCard';
 
 export default function OrgAnalytics({ events, ticketsByEvent, bestEvent, mostPopularCategory, avgTicketPrice }) {
+  const [popupOpen, setPopupOpen] = useState(false);
+
   return (
     <div className="org-panel">
+      {popupOpen && ticketsByEvent?.length > 0 && (
+        <div className="org-modal-overlay" onClick={() => setPopupOpen(false)}>
+          <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}>
+            <button className="org-modal-close" onClick={() => setPopupOpen(false)}>✕</button>
+            <h3 className="org-modal-title">Ticket Sales Trend</h3>
+            <div className="org-modal-real-chart">
+              <TicketSparkChart data={ticketsByEvent} valueKey="tickets" labelKey="label" chartHeight={260} />
+            </div>
+          </div>
+        </div>
+      )}
       {events.length === 0 ? (
         <div className="org-empty">Create events to see analytics.</div>
       ) : (
         <>
-          <div className="org-chart-card" style={{ marginBottom: '2rem' }}>
-            <h3 className="org-chart-title">Ticket Sales Trend</h3>
-            <LineChart data={ticketsByEvent} valueKey="tickets" labelKey="label" />
-          </div>
-          <div className="org-stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)' }}>
+          <ChartCard
+            title="🎫 Ticket Sales Trend"
+            theme="spark"
+            onClick={() => setPopupOpen(true)}
+            className="org-chart-card-standalone"
+          >
+            <TicketSparkChart data={ticketsByEvent} valueKey="tickets" labelKey="label" chartHeight={220} />
+          </ChartCard>
+          <div className="org-stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: '2rem' }}>
             <div className="org-stat-card">
               <div className="org-stat-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>🏆</div>
               <div>

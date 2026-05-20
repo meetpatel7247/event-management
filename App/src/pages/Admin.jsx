@@ -5,6 +5,7 @@ import AdminOverview from '../components/Admin/AdminOverview';
 import AdminEvents from '../components/Admin/AdminEvents';
 import AdminUsers from '../components/Admin/AdminUsers';
 import './Admin.css';
+import '../components/charts/dashboardCharts.css';
 
 const TABS = ['Overview', 'Events', 'Users'];
 
@@ -87,6 +88,22 @@ const Admin = () => {
     events.forEach(ev => { map[ev.category || 'Other'] = (map[ev.category || 'Other'] || 0) + 1; });
     return Object.entries(map).map(([name, count]) => ({ name, count }));
   }, [events]);
+
+  const totalLikes = useMemo(() => events.reduce((s, e) => s + (e.likes || 0), 0), [events]);
+  const totalShares = useMemo(() => events.reduce((s, e) => s + (e.shares || 0), 0), [events]);
+  const engagementByEvent = useMemo(() =>
+    [...events]
+      .map(ev => ({
+        name: ev.title?.length > 18 ? `${ev.title.slice(0, 18)}…` : (ev.title || 'Event'),
+        likes: ev.likes || 0,
+        shares: ev.shares || 0,
+        total: (ev.likes || 0) + (ev.shares || 0),
+      }))
+      .filter(e => e.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 8),
+    [events]
+  );
 
   /* ── event handlers ── */
   const handleApprove = async (id) => {
@@ -191,8 +208,10 @@ const Admin = () => {
         <AdminOverview 
           totalRevenue={totalRevenue} revenueGrowth={revenueGrowth} events={events} pendingEvents={pendingEvents} 
           activeOrgs={activeOrgs} platformUsers={platformUsers} 
-          revenueTrend={revenueTrend} categoryData={categoryData} 
-          handleApprove={handleApprove} handleRejectEvent={handleRejectEvent} 
+          revenueTrend={revenueTrend} categoryData={categoryData}
+          totalLikes={totalLikes} totalShares={totalShares} engagementByEvent={engagementByEvent}
+          handleApprove={handleApprove} handleRejectEvent={handleRejectEvent}
+          setActiveTab={setActiveTab}
         />
       )}
 

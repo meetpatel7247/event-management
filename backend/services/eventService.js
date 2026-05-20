@@ -25,6 +25,22 @@ async function deleteEvent(id) {
   return await EventModel.findByIdAndDelete(id);
 }
 
+async function adjustLikes(id, delta) {
+  const event = await EventModel.findById(id);
+  if (!event) return null;
+  event.likes = Math.max(0, (event.likes || 0) + delta);
+  await event.save();
+  return event;
+}
+
+async function incrementShares(id) {
+  return await EventModel.findByIdAndUpdate(
+    id,
+    { $inc: { shares: 1 } },
+    { new: true, runValidators: true }
+  );
+}
+
 module.exports = {
   listEvents,
   listEventsByOrganizer,
@@ -32,4 +48,6 @@ module.exports = {
   createEvent,
   updateEvent,
   deleteEvent,
+  adjustLikes,
+  incrementShares,
 };

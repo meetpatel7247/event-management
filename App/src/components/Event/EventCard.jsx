@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBookingDetails } from '../../store/bookingSlice';
 import withFadeIn from '../../hoc/withFadeIn';
+import { eventApi } from '../../utils/api';
 import styles from './EventCard.module.css';
 
 /**
@@ -28,14 +29,17 @@ const EventCard = ({ event, isGrid = false }) => {
     // ── Like state (persisted per event in localStorage) ──────────────
     const likeKey = `liked_${event._id}`;
     const [liked, setLiked] = useState(() => localStorage.getItem(likeKey) === 'true');
-    const [likeCount, setLikeCount] = useState(() => {
-        const stored = parseInt(localStorage.getItem(`likeCount_${event._id}`), 10);
-        return isNaN(stored) ? (event.likes || 0) : stored;
-    });
+    const [likeCount, setLikeCount] = useState(event.likes || 0);
+    const [shareCount, setShareCount] = useState(event.shares || 0);
     const [likeBounce, setLikeBounce] = useState(false);
 
     // ── Share feedback state ───────────────────────────────────────────
     const [shareCopied, setShareCopied] = useState(false);
+
+    useEffect(() => {
+        setLikeCount(event.likes || 0);
+        setShareCount(event.shares || 0);
+    }, [event.likes, event.shares, event._id]);
 
     /**
      * Prevents the click from bubbling to the parent card, checks auth,
@@ -58,20 +62,25 @@ const EventCard = ({ event, isGrid = false }) => {
         navigate('/booking');
     };
 
-    /** Toggle like with animation and localStorage persistence */
-    const handleLike = (e) => {
+    /** Toggle like — synced to server so admin can see totals */
+    const handleLike = async (e) => {
         e.stopPropagation();
         const newLiked = !liked;
-        const newCount = newLiked ? likeCount + 1 : Math.max(0, likeCount - 1);
+        const action = newLiked ? 'like' : 'unlike';
         setLiked(newLiked);
-        setLikeCount(newCount);
         setLikeBounce(true);
         setTimeout(() => setLikeBounce(false), 400);
         localStorage.setItem(likeKey, String(newLiked));
-        localStorage.setItem(`likeCount_${event._id}`, String(newCount));
+        try {
+            const res = await eventApi.toggleLike(event._id, action);
+            setLikeCount(res.likes);
+        } catch {
+            setLiked(!newLiked);
+            localStorage.setItem(likeKey, String(!newLiked));
+        }
     };
 
-    /** Share via native API or copy link to clipboard */
+    /** Share via native API or copy link — counts on server when share succeeds */
     const handleShare = async (e) => {
         e.stopPropagation();
         const appBase = import.meta.env.VITE_APP_URL || window.location.origin;
@@ -89,6 +98,8 @@ const EventCard = ({ event, isGrid = false }) => {
                 setShareCopied(true);
                 setTimeout(() => setShareCopied(false), 2000);
             }
+            const res = await eventApi.recordShare(event._id);
+            setShareCount(res.shares);
         } catch {
             // User cancelled share or clipboard unavailable — silently ignore
         }
@@ -128,10 +139,11 @@ const EventCard = ({ event, isGrid = false }) => {
                     <button
                         className={`${styles.actionBtn} ${shareCopied ? styles.actionBtnCopied : ''}`}
                         onClick={handleShare}
-                        title="Share this event"
+                        title={`Share (${shareCount})`}
                         aria-label="Share event"
                     >
                         {shareCopied ? '✅' : '🔗'}
+                        {shareCount > 0 && <span className={styles.actionCount}>{shareCount}</span>}
                     </button>
 
                     {/* Like */}
@@ -142,6 +154,7 @@ const EventCard = ({ event, isGrid = false }) => {
                         aria-label={liked ? 'Unlike event' : 'Like event'}
                     >
                         {liked ? '❤️' : '🤍'}
+                        {likeCount > 0 && <span className={styles.actionCount}>{likeCount}</span>}
                     </button>
                 </div>
             </div>

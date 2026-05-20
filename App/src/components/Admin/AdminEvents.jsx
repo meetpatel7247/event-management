@@ -32,13 +32,15 @@ export default function AdminEvents({
               <th>ORGANIZER</th>
               <th>DATE</th>
               <th>STATUS</th>
+              <th>❤️ LIKES</th>
+              <th>🔗 SHARES</th>
               <th>REVENUE</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody>
             {filteredEvents.length === 0 && (
-              <tr><td colSpan={6} className="adm-table-empty">No events match your filter.</td></tr>
+              <tr><td colSpan={8} className="adm-table-empty">No events match your filter.</td></tr>
             )}
             {filteredEvents.map(ev => {
               const rev = bookings.filter(b => b.event?._id === ev._id).reduce((s,b) => s+(b.totalPrice||0), 0);
@@ -52,6 +54,8 @@ export default function AdminEvents({
                   <td>{ev.organizerName || ev.organizerId?.name || '—'}</td>
                   <td>{new Date(ev.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
                   <td><StatusBadge approved={ev.isApproved} past={isPast} /></td>
+                  <td style={{ color:'#fb7185', fontWeight:600 }}>{ev.likes || 0}</td>
+                  <td style={{ color:'#60a5fa', fontWeight:600 }}>{ev.shares || 0}</td>
                   <td style={{ color:'#10b981', fontWeight:600 }}>₹{rev.toFixed(1)}</td>
                   <td>
                     <div className="adm-row-actions">

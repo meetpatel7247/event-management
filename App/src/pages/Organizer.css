@@ -156,6 +156,8 @@
   gap: 1.25rem;
   margin-bottom: 2rem;
 }
+.org-charts-row .dash-chart-card { margin: 0; }
+.org-chart-card-standalone { margin-bottom: 0; }
 @media (max-width: 700px) { .org-charts-row { grid-template-columns: 1fr; } }
 
 .org-chart-card {
@@ -351,3 +353,22 @@
 .org-cal-tickets { text-align: right; }
 .org-cal-ticket-label { font-size: 0.7rem; color: #64748b; text-transform: uppercase; }
 .org-cal-ticket-val { font-size: 1rem; font-weight: 700; }
+/* -- Modal ------------------------------------------------------- */
+.org-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 1000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s ease; }
+.org-modal-content { background: #111827; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; width: 90%; max-width: 400px; padding: 2rem; position: relative; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5); animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.org-modal-content--wide { max-width: min(720px, 96vw); }
+.org-modal-real-chart { width: 100%; min-height: 240px; margin-top: 1rem; display: flex; align-items: stretch; }
+.org-modal-real-chart > * { width: 100%; }
+.org-modal-close { position: absolute; top: 1rem; right: 1rem; background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+.org-modal-close:hover { color: #fff; }
+.org-modal-title { margin: 0 0 1.5rem; font-size: 1.25rem; font-weight: 700; color: #e2e8f0; }
+.org-modal-stat { text-align: center; margin-bottom: 2rem; }
+.org-modal-value { font-size: 2.5rem; font-weight: 800; background: linear-gradient(135deg, #a78bfa, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+.org-modal-sub { color: #94a3b8; font-size: 0.9rem; }
+.org-modal-fake-chart { display: flex; align-items: flex-end; justify-content: space-between; height: 120px; padding: 0 1rem; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.org-modal-bar { flex: 1; background: linear-gradient(to top, #6366f1, #8b5cf6); border-radius: 4px 4px 0 0; animation: growUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; transform-origin: bottom; }
+.org-modal-footer-text { color: #64748b; font-size: 0.8rem; margin-top: 1rem; text-align: center; }
+.org-stat-card--clickable { cursor: pointer; text-align: left; display: flex; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem 1.35rem; align-items: center; gap: 1rem; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: inherit; font-family: inherit; width: 100%; }
+.org-stat-card--clickable:hover { border-color: rgba(139,92,246,0.4); transform: translateY(-4px); box-shadow: 0 10px 20px -10px rgba(139,92,246,0.2); }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: none; } }
+@keyframes growUp { from { transform: scaleY(0); } to { transform: scaleY(1); } }

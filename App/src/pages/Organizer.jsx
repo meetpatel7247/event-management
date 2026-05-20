@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { eventApi, bookingApi } from '../utils/api';
 import { toast } from 'react-toastify';
 import './Organizer.css';
+import '../components/charts/dashboardCharts.css';
 import OrgOverview from '../components/Organizer/OrgOverview';
 import OrgMyEvents from '../components/Organizer/OrgMyEvents';
 import OrgCalendar from '../components/Organizer/OrgCalendar';

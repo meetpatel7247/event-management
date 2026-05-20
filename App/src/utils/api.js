@@ -44,6 +44,14 @@ export const eventApi = {
     const response = await api.delete(`/events/${id}`);
     return response.data;
   },
+  toggleLike: async (id, action) => {
+    const response = await api.post(`/events/${id}/like`, { action });
+    return response.data;
+  },
+  recordShare: async (id) => {
+    const response = await api.post(`/events/${id}/share`);
+    return response.data;
+  },
 };
 
 export const authApi = {

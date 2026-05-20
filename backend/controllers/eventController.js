@@ -130,12 +130,40 @@ async function deleteEvent(req, res, next) {
   }
 }
 
+async function toggleLike(req, res, next) {
+  try {
+    const action = req.body?.action === 'unlike' ? 'unlike' : 'like';
+    const delta = action === 'unlike' ? -1 : 1;
+    const updated = await eventService.adjustLikes(req.params.id, delta);
+    if (!updated) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json({ likes: updated.likes, action });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function recordShare(req, res, next) {
+  try {
+    const updated = await eventService.incrementShares(req.params.id);
+    if (!updated) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json({ shares: updated.shares });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getEvents,
   getMyEvents,
   getEventById,
   createEvent,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  toggleLike,
+  recordShare,
 };
 

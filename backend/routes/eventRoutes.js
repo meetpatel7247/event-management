@@ -10,6 +10,12 @@ router.get('/', eventController.getEvents);
 // GET /api/events/my-events — organizer sees only their own events
 router.get('/my-events', authenticate, eventController.getMyEvents);
 
+// POST /api/events/:id/like — { action: 'like' | 'unlike' }
+router.post('/:id/like', eventController.toggleLike);
+
+// POST /api/events/:id/share — increment share count
+router.post('/:id/share', eventController.recordShare);
+
 // GET /api/events/:id
 router.get('/:id', eventController.getEventById);
 

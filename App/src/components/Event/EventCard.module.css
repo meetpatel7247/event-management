@@ -156,8 +156,11 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
+    gap: 2px;
+    min-width: 32px;
     height: 32px;
+    padding: 0 6px;
+    width: auto;
     border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.18);
     background: rgba(10, 5, 30, 0.65);
@@ -199,6 +202,13 @@
     font-size: 0.72rem;
     font-weight: 600;
     letter-spacing: 0.02em;
+}
+
+.actionCount {
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    opacity: 0.95;
 }
 
 /* Heart bounce keyframe */

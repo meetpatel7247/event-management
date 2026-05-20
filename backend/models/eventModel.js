@@ -69,6 +69,16 @@ const EventSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  likes: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
+  shares: {
+    type: Number,
+    default: 0,
+    min: 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

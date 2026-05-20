@@ -51,13 +51,14 @@ const BookingPage = () => {
     const [guestName, setGuestName] = useState(user?.name || '');
     const [guestEmail, setGuestEmail] = useState(user?.email || '');
     const [emailPreviewUrl, setEmailPreviewUrl] = useState(null);
+    const [bookingSuccess, setBookingSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (!bookingEvent) {
+        if (!bookingEvent && !bookingSuccess) {
             navigate('/');
         }
-    }, [bookingEvent, navigate]);
+    }, [bookingEvent, bookingSuccess, navigate]);
 
     /** Returns the unit price for the given ticket tier */
     const getPriceForType = (type) => {
@@ -114,14 +115,11 @@ const BookingPage = () => {
                 ticketType,
             });
 
+            toast.success('Ticket booked successfully!');
             if (res && res.emailPreviewUrl) {
                 setEmailPreviewUrl(res.emailPreviewUrl);
-                toast.success('Ticket booked & email sent! Check below.');
-            } else {
-                toast.success('Booking confirmed successfully!');
-                dispatch(clearBookingDetails());
-                navigate('/my-bookings');
             }
+            setBookingSuccess(true);
         } catch (error) {
             toast.error(error.response?.data?.message || 'Booking failed');
         } finally {
@@ -146,24 +144,31 @@ const BookingPage = () => {
             }}
         >
             <div className="premium-card" style={{ maxWidth: '640px', width: '100%' }}>
-                {emailPreviewUrl ? (
+                {bookingSuccess ? (
                     <div style={{ textAlign: 'center' }}>
                         <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#10b981' }}>🎉 Ticket Booked!</h2>
-                        <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
-                            We've sent a {ticketType} ticket with a QR code to your email.
+                        <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
+                            We've sent your {ticketType} ticket with a QR code directly to your email:
                         </p>
-                        <a
-                            href={emailPreviewUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="premium-button"
-                            style={{ display: 'inline-block', marginBottom: '2rem' }}
-                        >
-                            View Demo Email & QR Code
-                        </a>
-                        <br />
+                        <p style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+                            {guestEmail}
+                        </p>
+                        {emailPreviewUrl && (
+                            <>
+                                <a
+                                    href={emailPreviewUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="premium-button"
+                                    style={{ display: 'inline-block', marginBottom: '2rem' }}
+                                >
+                                    View Demo Email & QR Code
+                                </a>
+                                <br />
+                            </>
+                        )}
                         <button
-                            className="premium-button premium-button-outline"
+                            className="premium-button"
                             onClick={() => { dispatch(clearBookingDetails()); navigate('/my-bookings'); }}
                         >
                             Go to My Bookings
@@ -303,10 +308,10 @@ const BookingPage = () => {
                             </div>
                         </div>
 
-                        {/* Guest & Payment Details */}
+                        {/* Guest Details */}
                         <div style={{ marginBottom: '2rem' }}>
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
-                                Guest & Payment Details
+                                Guest Details
                             </h3>
                             <input
                                 type="text"
@@ -326,16 +331,6 @@ const BookingPage = () => {
                                 style={{ marginBottom: '1rem' }}
                                 required
                             />
-                            <input
-                                type="text"
-                                placeholder="Card Number (Mock)"
-                                className="premium-input"
-                                style={{ marginBottom: '1rem' }}
-                            />
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <input type="text" placeholder="MM/YY" className="premium-input" />
-                                <input type="text" placeholder="CVV" className="premium-input" />
-                            </div>
                         </div>
 
                         {/* Actions */}
@@ -353,7 +348,7 @@ const BookingPage = () => {
                                 onClick={handleConfirmBooking}
                                 disabled={loading}
                             >
-                                {loading ? 'Processing...' : `Pay ₹${totalPrice.toFixed(2)} & Book`}
+                                {loading ? 'Processing...' : `Confirm & Book (₹${totalPrice.toFixed(2)})`}
                             </button>
                         </div>
                     </>
