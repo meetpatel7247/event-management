@@ -5,7 +5,7 @@ import styles from './NavLogo.module.css';
 const NavLogo = () => {
     return (
         <Link to="/" className={styles.logo}>
-            Event.live
+            DEVITLTD
         </Link>
     );
 };
