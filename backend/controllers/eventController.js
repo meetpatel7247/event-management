@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const eventService = require('../services/eventService');
 const UserModel = require('../models/userModel');
 
@@ -65,6 +66,9 @@ async function getMyEvents(req, res, next) {
 
 async function getEventById(req, res, next) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid Event ID format' });
+    }
     const event = await eventService.findEventById(req.params.id);
     if (!event) {
       return res.status(404).json({ error: 'Event not found' });
@@ -103,6 +107,9 @@ async function createEvent(req, res, next) {
 
 async function updateEvent(req, res, next) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid Event ID format' });
+    }
     const payload = normalizeEventPayload(req.body);
     if (req.file) {
       payload.image = '/uploads/' + req.file.filename;
@@ -120,6 +127,9 @@ async function updateEvent(req, res, next) {
 
 async function deleteEvent(req, res, next) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid Event ID format' });
+    }
     const removed = await eventService.deleteEvent(req.params.id);
     if (!removed) {
       return res.status(404).json({ error: 'Event not found' });
@@ -132,6 +142,9 @@ async function deleteEvent(req, res, next) {
 
 async function toggleLike(req, res, next) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid Event ID format' });
+    }
     const action = req.body?.action === 'unlike' ? 'unlike' : 'like';
     const delta = action === 'unlike' ? -1 : 1;
     const updated = await eventService.adjustLikes(req.params.id, delta);
@@ -162,6 +175,9 @@ async function toggleLike(req, res, next) {
 
 async function recordShare(req, res, next) {
   try {
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid Event ID format' });
+    }
     const updated = await eventService.incrementShares(req.params.id);
     if (!updated) {
       return res.status(404).json({ error: 'Event not found' });
