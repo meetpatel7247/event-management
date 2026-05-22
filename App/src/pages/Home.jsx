@@ -30,8 +30,9 @@ const Home = ({ searchTerm, searchLocation }) => {
 
     useEffect(() => {
         const fetchEvents = async () => {
-            // Show "waking up server" notice if request takes more than 2.5s
-            const slowTimer = setTimeout(() => setSlowLoad(true), 2500);
+            // Show "waking up server" notice if request takes more than 6.0s (only for production, not localhost)
+            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+            const slowTimer = !isLocal ? setTimeout(() => setSlowLoad(true), 6000) : null;
             try {
                 let wishlistPromise = Promise.resolve([]);
                 if (user && user.token) {
@@ -61,7 +62,7 @@ const Home = ({ searchTerm, searchLocation }) => {
                 toast.error('Failed to load events from server.');
                 console.error(error);
             } finally {
-                clearTimeout(slowTimer);
+                if (slowTimer) clearTimeout(slowTimer);
                 setSlowLoad(false);
                 setLoading(false);
             }
