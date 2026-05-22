@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -28,10 +28,18 @@ const EventCard = ({ event, isGrid = false }) => {
 
     // ── Like state (persisted per event in localStorage) ──────────────
     const likeKey = `liked_${event._id}`;
-    const [liked, setLiked] = useState(() => localStorage.getItem(likeKey) === 'true');
+    const [liked, setLiked] = useState(() => {
+        if (user && user.token) {
+            if (event.isLiked !== undefined) return event.isLiked;
+        }
+        return localStorage.getItem(likeKey) === 'true';
+    });
     const [likeCount, setLikeCount] = useState(event.likes || 0);
     const [shareCount, setShareCount] = useState(event.shares || 0);
     const [likeBounce, setLikeBounce] = useState(false);
+
+    // Track previous value of the prop to prevent parent updates (such as searching/filters) from resetting local liked state
+    const prevIsLikedRef = useRef(event.isLiked);
 
     // ── Share feedback state ───────────────────────────────────────────
     const [shareCopied, setShareCopied] = useState(false);
@@ -40,6 +48,34 @@ const EventCard = ({ event, isGrid = false }) => {
         setLikeCount(event.likes || 0);
         setShareCount(event.shares || 0);
     }, [event.likes, event.shares, event._id]);
+
+    // Keep state in sync with updated props from database wishlist (only when prop actually changes)
+    useEffect(() => {
+        if (user && user.token) {
+            if (event.isLiked !== undefined && event.isLiked !== prevIsLikedRef.current) {
+                setLiked(event.isLiked);
+                prevIsLikedRef.current = event.isLiked;
+            }
+        } else {
+            const localVal = localStorage.getItem(likeKey) === 'true';
+            if (localVal !== liked) {
+                setLiked(localVal);
+            }
+        }
+    }, [event.isLiked, event._id, likeKey, user, liked]);
+
+    // Sync all copies/instances of this event card across different sections/carousels in real-time
+    useEffect(() => {
+        const handleGlobalLikeToggle = (e) => {
+            if (e.detail.eventId === event._id) {
+                setLiked(e.detail.liked);
+                setLikeCount(e.detail.likes);
+                prevIsLikedRef.current = e.detail.liked;
+            }
+        };
+        window.addEventListener('event-like-toggled', handleGlobalLikeToggle);
+        return () => window.removeEventListener('event-like-toggled', handleGlobalLikeToggle);
+    }, [event._id]);
 
     /**
      * Prevents the click from bubbling to the parent card, checks auth,
@@ -74,6 +110,10 @@ const EventCard = ({ event, isGrid = false }) => {
         try {
             const res = await eventApi.toggleLike(event._id, action);
             setLikeCount(res.likes);
+            // Dispatch to other cards instantly
+            window.dispatchEvent(new CustomEvent('event-like-toggled', {
+                detail: { eventId: event._id, liked: newLiked, likes: res.likes }
+            }));
         } catch {
             setLiked(!newLiked);
             localStorage.setItem(likeKey, String(!newLiked));
@@ -107,7 +147,7 @@ const EventCard = ({ event, isGrid = false }) => {
 
     return (
         <div
-            className={`premium-card ${styles.cardWrapper}`}
+            className={`premium-card ${styles.cardWrapper} ${event.category === 'Festival' ? styles.festivalCard : ''}`}
             data-layout={isGrid ? "grid" : "carousel"}
             onClick={() => navigate(`/event/${event._id}`)}
         >

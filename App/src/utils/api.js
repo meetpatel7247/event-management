@@ -127,6 +127,10 @@ export const userApi = {
     const response = await api.put('/users/profile', data);
     return response.data;
   },
+  getWishlist: async () => {
+    const response = await api.get('/users/wishlist');
+    return response.data;
+  },
 };
 
 export default api;

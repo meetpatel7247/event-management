@@ -35,7 +35,10 @@ const SidebarMenu = ({ isMenuOpen, closeMenu, user, handleLogout }) => {
                         <NavLink to="/admin" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>Admin Dashboard</NavLink>
                     )}
 
-                    <NavLink to="/activities" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>Activities</NavLink>
+                    <NavLink to="/wishlist" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>Wishlist</NavLink>
+                    {user && (
+                        <NavLink to="/my-bookings" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>My Bookings</NavLink>
+                    )}
                     <NavLink to="/about" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>About</NavLink>
                     <NavLink to="/contact" onClick={closeMenu} className={({ isActive }) => `${styles.sidebarLink} ${isActive ? styles.active : ''}`}>Contact</NavLink>
                 </div>

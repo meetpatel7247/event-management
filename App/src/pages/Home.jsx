@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { eventApi } from '../utils/api';
+import { useSelector } from 'react-redux';
+import { eventApi, userApi } from '../utils/api';
 import HeroSlider from '../components/HeroSlider/HeroSlider';
 import CategoryRow from '../components/CategoryRow/CategoryRow';
 import EventCarousel from '../components/Event/EventCarousel';
@@ -25,15 +26,31 @@ const Home = ({ searchTerm, searchLocation }) => {
     const [loading, setLoading] = useState(true);
     const [slowLoad, setSlowLoad] = useState(false);
     const location = useLocation();
+    const user = useSelector((state) => state.auth.user);
 
     useEffect(() => {
         const fetchEvents = async () => {
             // Show "waking up server" notice if request takes more than 2.5s
             const slowTimer = setTimeout(() => setSlowLoad(true), 2500);
             try {
+                let wishlistIds = new Set();
+                if (user && user.token) {
+                    try {
+                        const wishlist = await userApi.getWishlist();
+                        wishlistIds = new Set(wishlist.filter(e => e && e._id).map(e => e._id.toString()));
+                    } catch (err) {
+                        console.error('Failed to load wishlist in Home:', err);
+                    }
+                }
+
                 const data = await eventApi.getEvents();
-                setEvents(data);
-                setFilteredEvents(data);
+                const mappedData = data.map(event => ({
+                    ...event,
+                    isLiked: wishlistIds.has(event._id.toString())
+                }));
+
+                setEvents(mappedData);
+                setFilteredEvents(mappedData);
             } catch (error) {
                 toast.error('Failed to load events from server.');
                 console.error(error);
@@ -45,7 +62,7 @@ const Home = ({ searchTerm, searchLocation }) => {
         };
 
         fetchEvents();
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         const params = new URLSearchParams(location.search);

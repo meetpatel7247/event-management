@@ -1,26 +1,59 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from './AdminBadges';
+import CreateEventForm from '../Event/CreateEventForm';
+import { eventApi } from '../../utils/api';
+import { toast } from 'react-toastify';
 
 export default function AdminEvents({
   filteredEvents, eventSearch, setEventSearch, eventFilter, setEventFilter,
-  bookings, handleApprove, handleRejectEvent
+  bookings, handleApprove, handleRejectEvent, onEventUpdated
 }) {
   const navigate = useNavigate();
+  const [editingEvent, setEditingEvent] = useState(null);
+
+  const handleUpdate = async (formData) => {
+    try {
+      await eventApi.updateEvent(editingEvent._id, formData);
+      toast.success('Event updated!');
+      setEditingEvent(null);
+      if (onEventUpdated) onEventUpdated();
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Failed to update event');
+    }
+  };
+
+  // ── Edit modal overlay ───────────────────────────────────────────────────
+  if (editingEvent) {
+    return (
+      <div className="adm-panel">
+        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
+          <CreateEventForm
+            initialData={editingEvent}
+            onSubmit={handleUpdate}
+            onCancel={() => setEditingEvent(null)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="adm-panel">
-      <div className="adm-search-bar">
-        <div className="adm-search-input-wrap">
-          <span className="adm-search-icon">🔍</span>
-          <input className="adm-search-input" placeholder="Search events…"
-            value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
-        </div>
-        <div className="adm-filter-group">
-          {['All','Pending','Approved'].map(f => (
-            <button key={f}
-              className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
-              onClick={() => setEventFilter(f)}>{f}</button>
-          ))}
+      <div className="adm-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '300px', flexWrap: 'wrap' }}>
+          <div className="adm-search-input-wrap" style={{ flex: 1 }}>
+            <span className="adm-search-icon">🔍</span>
+            <input className="adm-search-input" placeholder="Search events…"
+              value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
+          </div>
+          <div className="adm-filter-group" style={{ margin: 0 }}>
+            {['All','Pending','Approved'].map(f => (
+              <button key={f}
+                className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
+                onClick={() => setEventFilter(f)}>{f}</button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -30,6 +63,7 @@ export default function AdminEvents({
             <tr>
               <th>EVENT</th>
               <th>ORGANIZER</th>
+              <th>TICKET PRICES</th>
               <th>DATE</th>
               <th>STATUS</th>
               <th>❤️ LIKES</th>
@@ -40,11 +74,12 @@ export default function AdminEvents({
           </thead>
           <tbody>
             {filteredEvents.length === 0 && (
-              <tr><td colSpan={8} className="adm-table-empty">No events match your filter.</td></tr>
+              <tr><td colSpan={9} className="adm-table-empty">No events match your filter.</td></tr>
             )}
             {filteredEvents.map(ev => {
               const rev = bookings.filter(b => b.event?._id === ev._id).reduce((s,b) => s+(b.totalPrice||0), 0);
               const isPast = new Date(ev.date) < new Date(new Date().setHours(0,0,0,0));
+
               return (
                 <tr key={ev._id} className="adm-table-row">
                   <td>
@@ -52,6 +87,13 @@ export default function AdminEvents({
                     <div className="adm-ev-cat">{ev.category}</div>
                   </td>
                   <td>{ev.organizerName || ev.organizerId?.name || '—'}</td>
+                  <td>
+                    <div style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: 1.6 }}>
+                      Normal: <strong style={{ color: '#38bdf8' }}>₹{ev.price ?? 0}</strong><br />
+                      VIP: <strong style={{ color: '#a78bfa' }}>₹{ev.vipPrice ?? 0}</strong><br />
+                      VVIP: <strong style={{ color: '#ec4899' }}>₹{ev.vvipPrice ?? 0}</strong>
+                    </div>
+                  </td>
                   <td>{new Date(ev.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
                   <td><StatusBadge approved={ev.isApproved} past={isPast} /></td>
                   <td style={{ color:'#fb7185', fontWeight:600 }}>{ev.likes || 0}</td>
@@ -60,6 +102,8 @@ export default function AdminEvents({
                   <td>
                     <div className="adm-row-actions">
                       <button className="adm-icon-btn adm-icon-view" title="View" onClick={() => navigate(`/event/${ev._id}`)}>👁</button>
+                      <button className="adm-icon-btn" title="Edit Prices" onClick={() => setEditingEvent(ev)}
+                        style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', border: '1px solid rgba(167,139,250,0.3)' }}>✏️</button>
                       {!ev.isApproved && (
                         <button className="adm-icon-btn adm-icon-approve" title="Approve" onClick={() => handleApprove(ev._id)}>✓</button>
                       )}

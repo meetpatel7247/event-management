@@ -100,7 +100,6 @@ const Organizer = () => {
   };
 
   const handleDeleteEvent = async (id) => {
-    if (!window.confirm('Delete this event?')) return;
     try {
       await eventApi.deleteEvent(id);
       await refreshDashboard(false);
@@ -174,6 +173,7 @@ const Organizer = () => {
           avgTicketPrice={avgTicketPrice}
         />
       )}
+
     </div>
   );
 };

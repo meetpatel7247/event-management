@@ -13,6 +13,7 @@ import BookingPage from '../pages/BookingPage';
 import About from '../pages/About';
 import Contact from '../pages/Contact';
 import Offers from '../pages/Offers';
+import Wishlist from '../pages/Wishlist';
 
 import Careers from '../pages/Careers';
 import Blog from '../pages/Blog';
@@ -63,6 +64,7 @@ const AppRoutes = ({ searchTerm, searchLocation }) => {
             <Route path="/corporates" element={<Corporates />} />
             <Route path="/offers" element={<Offers />} />
             <Route path="/gift-cards" element={<GiftCards />} />
+            <Route path="/wishlist" element={<Wishlist />} />
 
         </Routes>
     );

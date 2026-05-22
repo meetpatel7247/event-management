@@ -11,7 +11,7 @@ router.get('/', eventController.getEvents);
 router.get('/my-events', authenticate, eventController.getMyEvents);
 
 // POST /api/events/:id/like — { action: 'like' | 'unlike' }
-router.post('/:id/like', eventController.toggleLike);
+router.post('/:id/like', optionalAuthenticate, eventController.toggleLike);
 
 // POST /api/events/:id/share — increment share count
 router.post('/:id/share', eventController.recordShare);

@@ -138,6 +138,22 @@ async function toggleLike(req, res, next) {
     if (!updated) {
       return res.status(404).json({ error: 'Event not found' });
     }
+
+    // Update user's persistent wishlist using high-performance atomic updates
+    if (req.user) {
+      if (action === 'like') {
+        await UserModel.updateOne(
+          { _id: req.user.userId },
+          { $addToSet: { wishlist: req.params.id } }
+        );
+      } else {
+        await UserModel.updateOne(
+          { _id: req.user.userId },
+          { $pull: { wishlist: req.params.id } }
+        );
+      }
+    }
+
     res.json({ likes: updated.likes, action });
   } catch (err) {
     next(err);

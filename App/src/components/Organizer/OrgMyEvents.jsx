@@ -41,6 +41,16 @@ export default function OrgMyEvents({
                     <div className="org-event-card-rows">
                       <div className="org-event-card-row"><span>Date:</span><span>{new Date(ev.date).toLocaleDateString()}</span></div>
                       <div className="org-event-card-row"><span>Tickets Sold:</span><span>{sold}/{totalSeatsEv}</span></div>
+                      <div className="org-event-card-row" style={{ marginTop: '0.4rem', borderTop: '1px dashed rgba(255,255,255,0.06)', paddingTop: '0.4rem', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', color: '#64748b' }}>
+                          <span>Pricing:</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                          <span style={{ color: '#38bdf8' }}>Normal: ₹{ev.price}</span>
+                          <span style={{ color: '#a78bfa' }}>VIP: ₹{ev.vipPrice || 0}</span>
+                          <span style={{ color: '#ec4899' }}>VVIP: ₹{ev.vvipPrice || 0}</span>
+                        </div>
+                      </div>
                     </div>
                     <div className="org-event-card-actions">
                       <button className="org-action-btn org-action-view" onClick={() => navigate(`/event/${ev._id}`)}>👁 View</button>

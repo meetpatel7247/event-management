@@ -52,7 +52,7 @@ function App() {
       <Footer />
 
       {/* Global Toast component for resolving user actions cleanly */}
-      <ToastContainer position="bottom-right" theme="dark" />
+      <ToastContainer position="bottom-right" theme="dark" limit={1} />
     </div>
   );
 }

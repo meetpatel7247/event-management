@@ -7,6 +7,7 @@ router.use(authenticate);
 
 // Protected routes (Self-management)
 router.get('/me', userController.getMe);
+router.get('/wishlist', userController.getWishlist);
 router.put('/profile', userController.patchMe);
 router.delete('/me', userController.deleteMe);
 

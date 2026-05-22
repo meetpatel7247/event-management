@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { setBookingDetails } from '../store/bookingSlice';
 import CreateEventForm from '../components/Event/CreateEventForm';
-import { eventApi } from '../utils/api';
+import { eventApi, userApi } from '../utils/api';
 import styles from './EventDetails.module.css';
 import { toast } from 'react-toastify';
 
@@ -35,11 +35,31 @@ const EventDetails = () => {
 
     const fetchData = async () => {
         try {
+            let wishlistIds = new Set();
+            if (user && user.token) {
+                try {
+                    const wishlist = await userApi.getWishlist();
+                    wishlistIds = new Set(wishlist.filter(e => e && e._id).map(e => e._id.toString()));
+                } catch (err) {
+                    console.error('Failed to load wishlist in Details:', err);
+                }
+            }
+
             const data = await eventApi.getEventById(id);
             if (data) {
-                setEvent(data);
+                const mappedEvent = {
+                    ...data,
+                    isLiked: wishlistIds.has(data._id.toString())
+                };
+                setEvent(mappedEvent);
                 const allData = await eventApi.getEvents();
-                setRelatedEvents(allData.filter(e => e.category === data.category && e._id !== data._id));
+                const mappedRelated = allData
+                    .filter(e => e.category === data.category && e._id !== data._id)
+                    .map(e => ({
+                        ...e,
+                        isLiked: wishlistIds.has(e._id.toString())
+                    }));
+                setRelatedEvents(mappedRelated);
             } else toast.error('Event not found');
         } catch (error) {
             toast.error('Failed to load event details.');
@@ -59,7 +79,7 @@ const EventDetails = () => {
         }
     }, [quantity, event]);
 
-    useEffect(() => { fetchData(); }, [id]);
+    useEffect(() => { fetchData(); }, [id, user]);
 
     const handleBook = () => {
         if (!user || !user.token) return navigate('/login');

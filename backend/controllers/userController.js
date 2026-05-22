@@ -55,8 +55,22 @@ async function deleteUserAdmin(req, res, next) {
   }
 }
 
+async function getWishlist(req, res, next) {
+  try {
+    const UserModel = require('../models/userModel');
+    const user = await UserModel.findById(req.user.userId).populate('wishlist');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user.wishlist || []);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getMe,
+  getWishlist,
   listUsers,
   patchMe,
   deleteMe,

@@ -21,13 +21,14 @@ const CategoryRow = () => {
             <div className={styles.grid}>
                 {categories.map((cat, idx) => {
                     const isActive = cat.checkActive(catParam, viewParam);
+                    const isFestival = cat.label === 'Festivals';
                     return (
                         <Link 
                             key={idx} 
                             to={cat.path} 
-                            className={`${styles.card} ${isActive ? styles.cardActive : ''}`}
+                            className={`${styles.card} ${isActive ? styles.cardActive : ''} ${isActive && isFestival ? styles.festivalActive : ''}`}
                         >
-                            <div className={styles.icon}>{cat.icon}</div>
+                            <div className={`${styles.icon} ${isActive ? styles.iconActive : ''}`}>{cat.icon}</div>
                             <span className={styles.label}>{cat.label}</span>
                         </Link>
                     );

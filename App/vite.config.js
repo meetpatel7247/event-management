@@ -10,6 +10,7 @@ export default defineConfig({
       'use-sync-external-store/with-selector': 'use-sync-external-store/shim/with-selector.js'
     }
   },
+
   server: {
     proxy: {
       '/api/v1': {

@@ -116,7 +116,6 @@ const Admin = () => {
   };
 
   const handleRejectEvent = async (id) => {
-    if (!window.confirm('Reject (delete) this event?')) return;
     try {
       await eventApi.deleteEvent(id);
       setEvents(ev => ev.filter(e => e._id !== id));
@@ -126,23 +125,26 @@ const Admin = () => {
 
   const handleDeleteUser = async (id) => {
     const isSelf = id === userInfo._id;
-    if (!window.confirm(isSelf ? 'Delete your own account?' : 'Remove this user?')) return;
     try {
       await adminApi.deleteUser(id);
-      if (isSelf) { sessionStorage.removeItem('user'); window.location.href = '/login'; }
-      else { setUsers(us => us.filter(u => u._id !== id)); toast.success('User removed.'); }
+      if (isSelf) {
+        sessionStorage.removeItem('user');
+        window.location.href = '/login';
+      } else {
+        setUsers(us => us.filter(u => u._id !== id));
+        toast.success('User removed.');
+      }
     } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
   };
 
   const handleResetData = async () => {
-    if (!window.confirm('⚠️ This will permanently delete ALL ticket/booking records and restore event seat counts. Are you sure?')) return;
-    if (!window.confirm('🚨 Final confirmation: This action CANNOT be undone. Proceed?')) return;
     try {
       await adminApi.resetBookings();
       toast.success('✅ All ticket data reset successfully!');
       refresh(false);
     } catch (e) { toast.error(e.response?.data?.message || 'Reset failed'); }
   };
+
 
   /* ── filtered lists ── */
   const filteredEvents = useMemo(() => {
@@ -208,6 +210,8 @@ const Admin = () => {
           totalLikes={totalLikes} totalShares={totalShares} engagementByEvent={engagementByEvent}
           handleApprove={handleApprove} handleRejectEvent={handleRejectEvent}
           setActiveTab={setActiveTab}
+          users={users}
+          bookings={bookings}
         />
       )}
 
@@ -216,7 +220,8 @@ const Admin = () => {
           filteredEvents={filteredEvents} eventSearch={eventSearch} 
           setEventSearch={setEventSearch} eventFilter={eventFilter} 
           setEventFilter={setEventFilter} bookings={bookings} 
-          handleApprove={handleApprove} handleRejectEvent={handleRejectEvent} 
+          handleApprove={handleApprove} handleRejectEvent={handleRejectEvent}
+          onEventUpdated={() => refresh(false)}
         />
       )}
 
