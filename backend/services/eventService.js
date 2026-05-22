@@ -1,4 +1,5 @@
 const EventModel = require('../models/eventModel');
+const UserModel = require('../models/userModel'); // Ensure User schema is registered for populate
 
 async function listEvents() {
   return await EventModel.find().populate('organizerId', 'name email');

@@ -1,5 +1,6 @@
 const BookingModel = require('../models/bookingModel');
 const EventModel = require('../models/eventModel');
+const UserModel = require('../models/userModel'); // Ensure User schema is registered for populate
 
 async function createBooking({ userId, eventId, quantity, totalPrice, ticketType }) {
   const event = await EventModel.findById(eventId);
