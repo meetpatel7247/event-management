@@ -44,7 +44,8 @@ function normalizeEventPayload(rawBody = {}) {
 
 async function getEvents(req, res, next) {
   try {
-    const data = await eventService.listEvents();
+    const showAll = req.user && req.user.role === 'admin';
+    const data = await eventService.listEvents(showAll);
     res.json(data);
   } catch (err) {
     next(err);

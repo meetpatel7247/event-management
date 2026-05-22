@@ -5,7 +5,7 @@ const upload = require('../middleware/upload');
 const eventController = require('../controllers/eventController');
 
 // GET /api/events
-router.get('/', eventController.getEvents);
+router.get('/', optionalAuthenticate, eventController.getEvents);
 
 // GET /api/events/my-events — organizer sees only their own events
 router.get('/my-events', authenticate, eventController.getMyEvents);

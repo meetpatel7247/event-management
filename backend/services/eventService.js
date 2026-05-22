@@ -1,8 +1,9 @@
 const EventModel = require('../models/eventModel');
 const UserModel = require('../models/userModel'); // Ensure User schema is registered for populate
 
-async function listEvents() {
-  return await EventModel.find().populate('organizerId', 'name email');
+async function listEvents(showAll = false) {
+  const filter = showAll ? {} : { isApproved: true };
+  return await EventModel.find(filter).populate('organizerId', 'name email');
 }
 
 /** Returns only events created by this specific organizer */
