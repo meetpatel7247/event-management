@@ -6,6 +6,7 @@ import styles from './MyBookings.module.css';
 import { useNavigate } from 'react-router-dom';
 import BookingSlider from '../components/Booking/BookingSlider';
 import BookingCard from '../components/Booking/BookingCard';
+import Spinner from '../components/Spinner/Spinner';
 
 /**
  * MyBookings Component
@@ -67,7 +68,7 @@ const MyBookings = () => {
         fetchBookings();
     }, [user]);
 
-    if (loading) return <div className="container" style={{ textAlign: 'center', paddingTop: '2rem' }}>Loading bookings...</div>;
+    if (loading) return <Spinner message="Loading your bookings..." />;
 
     const totalBookings = bookings.urgent.length + bookings.upcoming.length + bookings.past.length;
 

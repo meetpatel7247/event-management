@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import EventImageSlider from '../components/EventDetails/EventImageSlider';
 import BookingPanel from '../components/EventDetails/BookingPanel';
 import RelatedEvents from '../components/EventDetails/RelatedEvents';
+import Spinner from '../components/Spinner/Spinner';
 
 /**
  * EventDetails Component
@@ -75,7 +76,7 @@ const EventDetails = () => {
         } catch (error) { toast.error(error.message || 'Failed to update event'); }
     };
 
-    if (loading) return <div className="container" style={{ textAlign: 'center', padding: '4rem' }}>Loading event details...</div>;
+    if (loading) return <Spinner message="Loading event details..." />;
     if (!event) return (
         <div className="container" style={{ textAlign: 'center', padding: '4rem' }}>
             <h2>Event not found</h2>

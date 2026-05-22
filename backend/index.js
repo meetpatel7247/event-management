@@ -18,8 +18,8 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '1000mb' }));
+app.use(express.urlencoded({ limit: '1000mb', extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const apiPrefix = process.env.API_PREFIX || '/api/v1';

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import GlassCard from '../components/GlassCard/GlassCard';
 import styles from './Offers.module.css';
 import { toast } from 'react-toastify';
+import Spinner from '../components/Spinner/Spinner';
 
 /**
  * Offers Page Component
@@ -30,7 +31,7 @@ const Offers = () => {
     }, []);
 
     if (loading) {
-        return <div className="container" style={{ textAlign: 'center', marginTop: '4rem' }}>Loading offers...</div>;
+        return <Spinner message="Loading special offers..." />;
     }
 
     return (

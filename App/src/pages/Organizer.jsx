@@ -7,6 +7,7 @@ import OrgOverview from '../components/Organizer/OrgOverview';
 import OrgMyEvents from '../components/Organizer/OrgMyEvents';
 import OrgCalendar from '../components/Organizer/OrgCalendar';
 import OrgAnalytics from '../components/Organizer/OrgAnalytics';
+import Spinner from '../components/Spinner/Spinner';
 
 const TABS = ['Overview', 'My Events', 'Calendar', 'Analytics'];
 
@@ -109,12 +110,7 @@ const Organizer = () => {
 
   const openEdit = (ev) => { setEditingEvent(ev); setShowForm(true); };
 
-  if (loading) return (
-    <div className="org-loading">
-      <div className="org-spinner" />
-      <p>Loading dashboard…</p>
-    </div>
-  );
+  if (loading) return <Spinner message="Loading organizer dashboard..." />;
 
   return (
     <div className="org-root">

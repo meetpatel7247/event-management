@@ -1,0 +1,92 @@
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    min-height: 300px;
+    width: 100%;
+}
+
+.neon-spinner {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ring {
+    position: absolute;
+    border-radius: 50%;
+    border: 3px solid transparent;
+}
+
+.ring-outer {
+    width: 80px;
+    height: 80px;
+    border-top-color: var(--primary-color, #00f3ff);
+    border-bottom-color: var(--primary-color, #00f3ff);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.2);
+    animation: spin-clockwise 1.5s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+.ring-middle {
+    width: 60px;
+    height: 60px;
+    border-left-color: var(--secondary-color, #ff00ff);
+    border-right-color: var(--secondary-color, #ff00ff);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.2);
+    animation: spin-counter-clockwise 1.2s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+.ring-inner {
+    width: 40px;
+    height: 40px;
+    border-top-color: var(--accent-color, #bc13fe);
+    border-bottom-color: var(--accent-color, #bc13fe);
+    box-shadow: 0 0 10px rgba(188, 19, 254, 0.2);
+    animation: spin-clockwise 1s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+.spinner-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color, #00f3ff);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--primary-color, #00f3ff);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.spinner-message {
+    margin-top: 2rem;
+    color: var(--text-main, #e0faff);
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-shadow: var(--text-glow);
+    animation: pulse-text 2s ease-in-out infinite;
+    text-align: center;
+}
+
+@keyframes spin-clockwise {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes spin-counter-clockwise {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+@keyframes pulse-text {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}

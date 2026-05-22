@@ -4,14 +4,14 @@
     width: 100%;
     overflow: hidden;
     position: relative;
-    padding: 0 2rem;
+    padding: 0;
 }
 
 .navBtn {
     position: absolute;
-    top: 60%;
+    top: 50%;
     transform: translateY(-50%);
-    background: rgba(10, 10, 15, 0.8);
+    background: rgba(10, 10, 15, 0.85);
     border: 1px solid var(--primary-color);
     color: var(--primary-color);
     width: 40px;
@@ -38,11 +38,11 @@
 }
 
 .prevBtn {
-    left: -20px;
+    left: 10px;
 }
 
 .nextBtn {
-    right: -20px;
+    right: 10px;
 }
 
 @media (max-width: 768px) {
@@ -50,7 +50,7 @@
         display: none;
     }
     .wrapper {
-        padding: 0 1rem;
+        padding: 0;
     }
 }
 

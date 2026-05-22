@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../store/authSlice';
 import styles from './Navbar.module.css';
@@ -18,6 +18,7 @@ const Navbar = ({ onSearch, onLocationChange }) => {
     const user = useSelector((state) => state.auth.user);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
@@ -29,10 +30,22 @@ const Navbar = ({ onSearch, onLocationChange }) => {
         navigate('/');
     };
 
+    const showBackArrow = location.pathname !== '/';
+
     return (
         <nav className={styles.navbar}>
             <div className={styles.topRow}>
-                <NavLogo />
+                <div className={styles.leftSection}>
+                    {showBackArrow && (
+                        <button className={styles.backBtn} onClick={() => navigate(-1)} aria-label="Go Back">
+                            <svg stroke="currentColor" fill="none" strokeWidth="2.5" viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                        </button>
+                    )}
+                    <NavLogo />
+                </div>
                 <NavSearch onSearch={onSearch} onLocationChange={onLocationChange} />
 
                 <div className={styles.actions}>

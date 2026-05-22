@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import AdminOverview from '../components/Admin/AdminOverview';
 import AdminEvents from '../components/Admin/AdminEvents';
 import AdminUsers from '../components/Admin/AdminUsers';
+import Spinner from '../components/Spinner/Spinner';
 import './Admin.css';
 import '../components/charts/dashboardCharts.css';
 
@@ -163,12 +164,7 @@ const Admin = () => {
     return list;
   }, [users, userFilter, userSearch]);
 
-  if (loading) return (
-    <div className="adm-loading">
-      <div className="adm-spinner" />
-      <p>Loading admin data…</p>
-    </div>
-  );
+  if (loading) return <Spinner message="Loading admin dashboard..." />;
 
   return (
     <div className="adm-root">
