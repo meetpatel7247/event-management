@@ -33,17 +33,23 @@ const Home = ({ searchTerm, searchLocation }) => {
             // Show "waking up server" notice if request takes more than 2.5s
             const slowTimer = setTimeout(() => setSlowLoad(true), 2500);
             try {
-                let wishlistIds = new Set();
+                let wishlistPromise = Promise.resolve([]);
                 if (user && user.token) {
-                    try {
-                        const wishlist = await userApi.getWishlist();
-                        wishlistIds = new Set(wishlist.filter(e => e && e._id).map(e => e._id.toString()));
-                    } catch (err) {
+                    wishlistPromise = userApi.getWishlist().catch(err => {
                         console.error('Failed to load wishlist in Home:', err);
-                    }
+                        return [];
+                    });
                 }
 
-                const data = await eventApi.getEvents();
+                const [wishlist, data] = await Promise.all([
+                    wishlistPromise,
+                    eventApi.getEvents()
+                ]);
+
+                const wishlistIds = new Set(
+                    (wishlist || []).filter(e => e && e._id).map(e => e._id.toString())
+                );
+
                 const mappedData = data.map(event => ({
                     ...event,
                     isLiked: wishlistIds.has(event._id.toString())
