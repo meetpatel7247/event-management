@@ -99,14 +99,19 @@ app.use((err, _req, res, next) => {
 // Start server
 const startServer = async () => {
   try {
-    // Connect to Database
-    await connectDB();
-    
-    // Seed and Listen
-    await seedAdminFromEnv();
+    // Start listening immediately so that health checks and hosting platforms wake up instantly
     const server = app.listen(PORT, () => {
       console.log(`Backend API listening on port ${PORT}`);
     });
+
+    // Connect to Database and Seed in the background (non-blocking)
+    connectDB()
+      .then(async () => {
+        await seedAdminFromEnv();
+      })
+      .catch((err) => {
+        console.error('Database connection / seeding failed:', err.message);
+      });
     
     server.on('error', (err) => {
       if (err.code === 'EADDRINUSE') {
