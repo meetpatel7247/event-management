@@ -67,8 +67,8 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, '');
 
     const senderName = process.env.SMTP_SENDER_NAME || 'Vibe Events';
-    const senderEmail = process.env.SMTP_USER || 'onboarding@resend.dev';
-    const fromField = `"${senderName}" <${senderEmail}>`;
+    const resendFrom = `"${senderName}" <onboarding@resend.dev>`;
+    const smtpFrom = `"${senderName}" <${process.env.SMTP_USER || 'test@example.com'}>`;
 
     const subject = `Your Ticket is Booked! - ${eventTitle}`;
     const html = `
@@ -99,7 +99,7 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     // ── Strategy: try Resend first (works on Render), fall back to Gmail SMTP ──
     if (process.env.RESEND_API_KEY) {
       console.log('✉️ Sending via Resend HTTP API...');
-      const info = await sendViaResend(email, fromField, subject, html, attachments);
+      const info = await sendViaResend(email, resendFrom, subject, html, attachments);
       console.log('✅ Resend email sent:', info.id);
       return null;
     }
@@ -107,7 +107,7 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       console.log('✉️ Sending via Gmail SMTP (localhost)...');
       const transporter = await getGmailTransporter();
-      const info = await transporter.sendMail({ from: fromField, to: email, subject, html, attachments });
+      const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html, attachments });
       console.log('✅ Gmail email sent:', info.messageId);
       return null;
     }

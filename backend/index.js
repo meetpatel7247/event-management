@@ -67,7 +67,7 @@ app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          from: `"Vibe Events" <${smtpUser || 'onboarding@resend.dev'}>`,
+          from: '"Vibe Events" <onboarding@resend.dev>',
           to: [process.env.TEST_EMAIL || smtpUser || 'test@example.com'],
           subject: 'Vibe Events – SMTP Diagnostics Test',
           html: '<p>SMTP Diagnostics test from Render. If you see this, Resend is working!</p>',
