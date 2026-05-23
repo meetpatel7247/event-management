@@ -24,7 +24,7 @@ async function sendViaResend(to, from, subject, html) {
   return data;
 }
 
-// ─── Nodemailer / Gmail SMTP sender (works on localhost only) ─────────────────
+// ─── Nodemailer / Gmail SMTP sender (port 587 STARTTLS – works on Render too) ──
 let cachedTransporter = null;
 async function getGmailTransporter() {
   if (cachedTransporter) return cachedTransporter;
@@ -32,15 +32,19 @@ async function getGmailTransporter() {
   const dns = require('dns');
   if (dns && dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first');
 
+  // Use explicit host + port 587 (STARTTLS) instead of service:'gmail'
+  // Render.com allows outbound port 587 but blocks port 465 (SSL)
   cachedTransporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,           // STARTTLS (upgrades to TLS after connection)
     auth: {
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
     },
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 8000,
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
   });
   return cachedTransporter;
 }
@@ -80,26 +84,25 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
 
     const subject = `Your Ticket is Booked! - ${eventTitle}`;
 
-    // ── Strategy: Gmail SMTP on localhost (supports CID), Resend on production (base64 inline) ──
-    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
-
-    if (!isProduction && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    // ── Strategy 1: Always try Gmail SMTP first (works on localhost AND Render port 587) ──
+    // This allows sending to ANY user email address, unlike Resend free plan.
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
       try {
-        console.log(`✉️ Local: Sending via Gmail SMTP to ${email}...`);
-        // SMTP supports CID inline images
-        const htmlWithCid = buildEmailHtml(name, eventTitle, quantity, bookingId, 'cid:ticket-qr');
-        const attachments = [{ filename: 'ticket-qr.png', content: Buffer.from(base64Data, 'base64'), cid: 'ticket-qr' }];
+        console.log(`✉️ Trying Gmail SMTP to ${email}...`);
+        // Use base64 data URL for QR so it renders in all email clients
+        const htmlWithDataUrl = buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl);
         const transporter = await getGmailTransporter();
-        const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html: htmlWithCid, attachments });
-        console.log('✅ Gmail email sent:', info.messageId);
+        const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html: htmlWithDataUrl });
+        console.log('✅ Gmail SMTP email sent:', info.messageId);
         return null;
       } catch (err) {
-        console.warn('⚠️ SMTP failed, attempting Resend fallback...', err.message);
+        console.warn('⚠️ Gmail SMTP failed, trying Resend fallback...', err.message);
       }
     }
 
+    // ── Strategy 2: Resend fallback (only sends to verified emails on free plan) ──
     if (process.env.RESEND_API_KEY) {
-      console.log(`✉️ Production: Sending via Resend to ${email}...`);
+      console.log(`✉️ Falling back to Resend for ${email}...`);
       // Resend does NOT support CID – embed QR as base64 data URL directly in HTML
       const htmlWithDataUrl = buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl);
       const info = await sendViaResend(email, resendFrom, subject, htmlWithDataUrl);
@@ -107,17 +110,7 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
       return null;
     }
 
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      console.log(`✉️ Sending via Gmail SMTP to ${email}...`);
-      const htmlWithCid = buildEmailHtml(name, eventTitle, quantity, bookingId, 'cid:ticket-qr');
-      const attachments = [{ filename: 'ticket-qr.png', content: Buffer.from(base64Data, 'base64'), cid: 'ticket-qr' }];
-      const transporter = await getGmailTransporter();
-      const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html: htmlWithCid, attachments });
-      console.log('✅ Gmail email sent:', info.messageId);
-      return null;
-    }
-
-    console.warn('⚠️ No email credentials (RESEND_API_KEY or SMTP_USER) found. Email skipped.');
+    console.warn('⚠️ No email credentials (SMTP_USER or RESEND_API_KEY) found. Email skipped.');
     return null;
   } catch (error) {
     console.error('❌ Error sending email:', error.message);
