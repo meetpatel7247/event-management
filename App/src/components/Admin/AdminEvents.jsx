@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from './AdminBadges';
-import CreateEventForm from '../Event/CreateEventForm';
 import { eventApi } from '../../utils/api';
 import { toast } from 'react-toastify';
 
@@ -10,33 +9,6 @@ export default function AdminEvents({
   bookings, handleApprove, handleRejectEvent, onEventUpdated
 }) {
   const navigate = useNavigate();
-  const [editingEvent, setEditingEvent] = useState(null);
-
-  const handleUpdate = async (formData) => {
-    try {
-      await eventApi.updateEvent(editingEvent._id, formData);
-      toast.success('Event updated!');
-      setEditingEvent(null);
-      if (onEventUpdated) onEventUpdated();
-    } catch (e) {
-      toast.error(e.response?.data?.message || 'Failed to update event');
-    }
-  };
-
-  // ── Edit modal overlay ───────────────────────────────────────────────────
-  if (editingEvent) {
-    return (
-      <div className="adm-panel">
-        <div style={{ maxWidth: '760px', margin: '0 auto' }}>
-          <CreateEventForm
-            initialData={editingEvent}
-            onSubmit={handleUpdate}
-            onCancel={() => setEditingEvent(null)}
-          />
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="adm-panel">

@@ -146,7 +146,7 @@ const EventDetails = () => {
                                 </div>
 
                                 <div className={styles.actionButtons}>
-                                    {user && (user.role === 'admin' || user.name === event.organizer?.name || user.role === 'organizer') && (
+                                    {user && user.role === 'organizer' && event.organizerId && (event.organizerId._id === user._id || event.organizerId === user._id) && (
                                         <button className="premium-button" style={{ background: 'var(--secondary-color)', border: 'none', flex: 1 }} onClick={() => setShowEditForm(true)}>Edit Event</button>
                                     )}
                                     <button className="premium-button premium-button-outline" style={{ flex: 1 }} onClick={() => navigate('/')}>EVENTSPHERE</button>
