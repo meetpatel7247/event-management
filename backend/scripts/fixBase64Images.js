@@ -3,12 +3,13 @@
  * Uses MongoDB Regex and Projections to find base64 images in milliseconds
  * and performs a direct database update to replace them with Unsplash URLs.
  *
- * Run: node fixBase64Images.js
+ * Run: node scripts/fixBase64Images.js
  */
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const EventModel = require('./models/eventModel');
+const EventModel = require('../models/eventModel');
 
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 

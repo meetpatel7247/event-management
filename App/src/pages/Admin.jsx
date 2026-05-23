@@ -50,7 +50,7 @@ const Admin = () => {
 
   /* ── derived stats ── */
   const totalRevenue    = useMemo(() => bookings.reduce((s, b) => s + (b.totalPrice || 0), 0), [bookings]);
-  const pendingEvents   = useMemo(() => events.filter(e => !e.isApproved), [events]);
+  const pendingEvents   = useMemo(() => events.filter(e => !e.isApproved || e.hasPendingEdits), [events]);
   const activeOrgs      = useMemo(() => users.filter(u => u.role === 'organizer').length, [users]);
   const platformUsers   = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
 
@@ -149,7 +149,7 @@ const Admin = () => {
   /* ── filtered lists ── */
   const filteredEvents = useMemo(() => {
     let list = events;
-    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved);
+    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved || e.hasPendingEdits);
     if (eventFilter === 'Approved') list = list.filter(e => e.isApproved);
     if (eventSearch) list = list.filter(e => e.title?.toLowerCase().includes(eventSearch.toLowerCase()));
     return list;

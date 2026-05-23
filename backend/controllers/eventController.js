@@ -111,16 +111,100 @@ async function updateEvent(req, res, next) {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
       return res.status(400).json({ error: 'Invalid Event ID format' });
     }
+    
+    const event = await eventService.findEventById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    if (!req.user) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+
     const payload = normalizeEventPayload(req.body);
     if (req.file) {
       payload.image = '/uploads/' + req.file.filename;
     }
-    
-    const updated = await eventService.updateEvent(req.params.id, payload);
-    if (!updated) {
-      return res.status(404).json({ error: 'Event not found' });
+
+    // Role checks
+    if (req.user.role === 'admin') {
+      const isApproveRequest = payload.isApproved === true || payload.isApproved === 'true';
+      const isRejectRequest = payload.rejectEdits === true || payload.rejectEdits === 'true';
+
+      if (isApproveRequest) {
+        if (event.hasPendingEdits && event.tempEdits) {
+          // Apply tempEdits
+          Object.assign(event, event.tempEdits);
+          event.tempEdits = null;
+          event.hasPendingEdits = false;
+        }
+        event.isApproved = true;
+        await event.save();
+        return res.json(event);
+      } else if (isRejectRequest) {
+        event.tempEdits = null;
+        event.hasPendingEdits = false;
+        await event.save();
+        return res.json(event);
+      } else {
+        return res.status(403).json({ error: 'Admins cannot edit event details directly. Only organizers can edit event details.' });
+      }
+    } else if (req.user.role === 'organizer') {
+      const orgId = event.organizerId?._id ? event.organizerId._id.toString() : event.organizerId?.toString();
+      if (orgId && orgId !== req.user.userId) {
+        return res.status(403).json({ error: 'Forbidden: You do not own this event.' });
+      }
+
+      if (event.isApproved) {
+        if (payload.title) {
+          const cleanTitle = payload.title.trim();
+          const exists = await mongoose.model('Event').findOne({
+            _id: { $ne: req.params.id },
+            title: { $regex: new RegExp(`^${cleanTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') }
+          });
+          if (exists) {
+            return res.status(400).json({ error: 'An event with this title already exists. Please choose a unique title.' });
+          }
+        }
+
+        const editableFields = [
+          'title', 'description', 'date', 'time', 'location', 'category',
+          'price', 'vipPrice', 'vvipPrice', 'availableSeats', 'image',
+          'offerMinTickets', 'offerDiscount'
+        ];
+        
+        const edits = {};
+        editableFields.forEach(field => {
+          if (payload[field] !== undefined) {
+            if (['price', 'vipPrice', 'vvipPrice', 'availableSeats', 'offerMinTickets', 'offerDiscount'].includes(field)) {
+              if (payload[field] !== null) edits[field] = Number(payload[field]);
+            } else {
+              edits[field] = payload[field];
+            }
+          }
+        });
+
+        if (payload.image) {
+          edits.image = payload.image;
+        }
+
+        if (Object.keys(edits).length > 0) {
+          event.tempEdits = { ...(event.tempEdits || {}), ...edits };
+          event.hasPendingEdits = true;
+          await event.save();
+        }
+
+        return res.json({
+          message: 'Your edits have been submitted for admin approval.',
+          event
+        });
+      } else {
+        const updated = await eventService.updateEvent(req.params.id, payload);
+        return res.json(updated);
+      }
+    } else {
+      return res.status(403).json({ error: 'Forbidden: Only organizers or admins can edit events.' });
     }
-    res.json(updated);
   } catch (err) {
     next(err);
   }

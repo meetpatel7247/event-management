@@ -69,6 +69,14 @@ const EventSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  tempEdits: {
+    type: mongoose.Schema.Types.Mixed,
+    default: null,
+  },
+  hasPendingEdits: {
+    type: Boolean,
+    default: false,
+  },
   likes: {
     type: Number,
     default: 0,

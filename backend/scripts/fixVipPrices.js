@@ -3,12 +3,13 @@
  * Sets vipPrice = price + 300 and vvipPrice = price + 600
  * for every event that currently has 0 for those fields.
  *
- * Run: node fixVipPrices.js
+ * Run: node scripts/fixVipPrices.js
  */
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
 const mongoose = require('mongoose');
-const EventModel = require('./models/eventModel');
+const EventModel = require('../models/eventModel');
 
 const MONGO_URI = process.env.MONGO_URI || process.env.MONGODB_URI;
 

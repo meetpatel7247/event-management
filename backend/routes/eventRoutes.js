@@ -23,7 +23,7 @@ router.get('/:id', eventController.getEventById);
 router.post('/', authenticate, upload.single('image'), eventController.createEvent);
 
 // PUT /api/events/:id
-router.put('/:id', optionalAuthenticate, upload.single('image'), eventController.updateEvent);
+router.put('/:id', authenticate, upload.single('image'), eventController.updateEvent);
 
 // DELETE /api/events/:id
 router.delete('/:id', optionalAuthenticate, eventController.deleteEvent);
