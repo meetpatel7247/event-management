@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/event-management/', // Base path for GitHub Project Pages
+  base: process.env.VERCEL === '1' ? '/' : '/event-management/', // Dynamic base path for Vercel and GitHub Pages
   plugins: [react()],
   resolve: {
     alias: {
