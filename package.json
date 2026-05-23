@@ -1,0 +1,10 @@
+{
+  "name": "event-management-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "preinstall": "npm install --prefix backend",
+    "build": "echo 'No root build required'",
+    "start": "npm start --prefix backend"
+  }
+}
