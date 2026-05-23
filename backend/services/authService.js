@@ -29,9 +29,21 @@ async function register({ email, password, name, role }) {
     throw err;
   }
 
-  const existingUser = await UserModel.findOne({ email: email.toLowerCase() });
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanName = name.trim();
+
+  // Check if a user with this email (case-insensitive and trimmed) already exists in the system across all roles
+  const existingUser = await UserModel.findOne({ email: cleanEmail });
   if (existingUser) {
-    const err = new Error('User already exists');
+    const err = new Error('An account with this email already exists. Please use a different email.');
+    err.status = 409;
+    throw err;
+  }
+
+  // Check if a user with this name (case-insensitive and trimmed) already exists in the system across all roles
+  const existingName = await UserModel.findOne({ name: { $regex: new RegExp(`^${cleanName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } });
+  if (existingName) {
+    const err = new Error('An account with this name already exists. Please choose a unique name.');
     err.status = 409;
     throw err;
   }
@@ -44,12 +56,11 @@ async function register({ email, password, name, role }) {
     err.status = 400;
     throw err;
   }
-  // Multiple organizers are allowed — no restriction here
 
   const user = await UserModel.create({ 
-    email: email.toLowerCase(), 
+    email: cleanEmail, 
     password, // Hashing is handled by pre-save hook in userModel.js
-    name, 
+    name: cleanName, 
     role: r 
   });
 

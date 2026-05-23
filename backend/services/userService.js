@@ -27,12 +27,29 @@ async function updateProfile(userId, { name, email, password, currentPassword })
     throw err;
   }
 
-  if (email && email !== user.email) {
-    const exists = await UserModel.findOne({ email });
-    if (exists) {
-      const err = new Error('Email already in use');
-      err.status = 409;
-      throw err;
+  let cleanEmail = null;
+  if (email) {
+    cleanEmail = email.trim().toLowerCase();
+    if (cleanEmail !== user.email) {
+      const exists = await UserModel.findOne({ email: cleanEmail });
+      if (exists) {
+        const err = new Error('Email already in use. Please use a different email.');
+        err.status = 409;
+        throw err;
+      }
+    }
+  }
+
+  let cleanName = null;
+  if (name) {
+    cleanName = name.trim();
+    if (cleanName.toLowerCase() !== user.name.toLowerCase()) {
+      const exists = await UserModel.findOne({ name: { $regex: new RegExp(`^${cleanName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') } });
+      if (exists) {
+        const err = new Error('Name is already in use. Please choose a unique name.');
+        err.status = 409;
+        throw err;
+      }
     }
   }
 
@@ -51,8 +68,8 @@ async function updateProfile(userId, { name, email, password, currentPassword })
     user.password = password;
   }
 
-  if (name) user.name = name;
-  if (email) user.email = email;
+  if (cleanName) user.name = cleanName;
+  if (cleanEmail) user.email = cleanEmail;
 
   const updatedUser = await user.save();
   const token = authService.signToken(updatedUser);

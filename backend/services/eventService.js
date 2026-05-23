@@ -16,10 +16,33 @@ async function findEventById(id) {
 }
 
 async function createEvent(payload) {
+  if (payload.title) {
+    const cleanTitle = payload.title.trim();
+    const exists = await EventModel.findOne({
+      title: { $regex: new RegExp(`^${cleanTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') }
+    });
+    if (exists) {
+      const err = new Error('An event with this title already exists. Please choose a unique title.');
+      err.status = 400;
+      throw err;
+    }
+  }
   return await EventModel.create(payload);
 }
 
 async function updateEvent(id, payload) {
+  if (payload.title) {
+    const cleanTitle = payload.title.trim();
+    const exists = await EventModel.findOne({
+      _id: { $ne: id },
+      title: { $regex: new RegExp(`^${cleanTitle.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}$`, 'i') }
+    });
+    if (exists) {
+      const err = new Error('An event with this title already exists. Please choose a unique title.');
+      err.status = 400;
+      throw err;
+    }
+  }
   return await EventModel.findByIdAndUpdate(id, payload, { new: true, runValidators: true });
 }
 
