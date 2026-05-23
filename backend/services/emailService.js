@@ -1,6 +1,43 @@
 const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
 
+let cachedTransporter = null;
+let cachedTestAccount = null;
+
+async function getTransporter() {
+  if (cachedTransporter) {
+    return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER };
+  }
+
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  if (smtpUser && smtpPass) {
+    cachedTransporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+  } else {
+    // Re-use a single test account created once
+    console.log('🔄 Provisioning single Ethereal Test Account...');
+    cachedTestAccount = await nodemailer.createTestAccount();
+    cachedTransporter = nodemailer.createTransport({
+      host: 'smtp.ethereal.email',
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: cachedTestAccount.user, // generated ethereal user
+        pass: cachedTestAccount.pass, // generated ethereal password
+      },
+    });
+  }
+
+  return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER };
+}
+
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
   try {
     // Generate QR Code as Data URI
@@ -8,35 +45,12 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
       color: { dark: '#000000', light: '#ffffff' }
     });
 
-    let transporter;
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-
-    if (smtpUser && smtpPass) {
-      transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: smtpUser,
-          pass: smtpPass,
-        },
-      });
-    } else {
-      // Create a test account for ethereal email
-      const testAccount = await nodemailer.createTestAccount();
-      transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: testAccount.user, // generated ethereal user
-          pass: testAccount.pass, // generated ethereal password
-        },
-      });
-    }
+    const { transporter, isTest } = await getTransporter();
 
     // Extract base64 part of the QR code for standard CID attachment embedding
     const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, "");
 
+    const smtpUser = process.env.SMTP_USER;
     const mailOptions = {
       from: smtpUser ? `"${process.env.SMTP_SENDER_NAME || 'Vibe Events'}" <${smtpUser}>` : '"Vibe Events" <noreply@vibeevents.com>',
       to: email,
@@ -67,11 +81,12 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     const info = await transporter.sendMail(mailOptions);
     console.log('Message sent: %s', info.messageId);
 
-    if (smtpUser) {
-      return null;
+    if (isTest) {
+      const previewUrl = nodemailer.getTestMessageUrl(info);
+      console.log('Preview URL: %s', previewUrl);
+      return previewUrl;
     } else {
-      console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-      return nodemailer.getTestMessageUrl(info);
+      return null;
     }
   } catch (error) {
     console.error('Error sending email:', error);
