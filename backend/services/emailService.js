@@ -1,24 +1,12 @@
 const QRCode = require('qrcode');
 
 // ─── Resend HTTP API sender (works on Render – uses HTTPS port 443) ──────────
-async function sendViaResend(to, from, subject, html, attachments) {
+// NOTE: Resend does NOT support CID inline images. We embed QR as base64 data URL in HTML.
+async function sendViaResend(to, from, subject, html) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('RESEND_API_KEY not set');
 
-  // Build payload – Resend supports base64 attachments
-  const payload = {
-    from,
-    to: [to],
-    subject,
-    html,
-  };
-
-  if (attachments && attachments.length > 0) {
-    payload.attachments = attachments.map((a) => ({
-      filename: a.filename,
-      content: a.content instanceof Buffer ? a.content.toString('base64') : a.content,
-    }));
-  }
+  const payload = { from, to: [to], subject, html };
 
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -57,10 +45,30 @@ async function getGmailTransporter() {
   return cachedTransporter;
 }
 
+// ─── Build HTML with QR embedded as base64 data URL (works everywhere) ────────
+function buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl) {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 12px; background-color: #ffffff; color: #1e293b;">
+      <h2 style="color: #6366f1; margin-top: 0; font-size: 1.75rem;">🎉 Ticket Confirmation</h2>
+      <p>Hi <strong style="color: #0f172a;">${name}</strong>,</p>
+      <p>Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is successfully confirmed!</p>
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
+      <p style="margin: 0.5rem 0;"><strong>Tickets Quantity:</strong> ${quantity}</p>
+      <p style="margin: 0.5rem 0;"><strong>Booking ID:</strong> <code style="background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700;">${bookingId}</code></p>
+      <br/>
+      <p style="font-weight: 600; margin-bottom: 0.5rem;">Present this QR code at the event entrance:</p>
+      <div style="text-align: center; margin: 1.5rem 0;">
+        <img src="${qrDataUrl}" alt="Ticket QR Code" style="width: 220px; height: 220px; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" />
+      </div>
+      <p style="color: #64748b; font-size: 0.875rem; text-align: center; margin-top: 2rem;">Thank you for booking with Vibe Events!</p>
+    </div>
+  `;
+}
+
 // ─── Main entry point ─────────────────────────────────────────────────────────
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
   try {
-    // Generate QR Code as base64 PNG
+    // Generate QR Code as base64 data URL (works for both SMTP and Resend)
     const qrDataUrl = await QRCode.toDataURL(bookingId.toString(), {
       color: { dark: '#000000', light: '#ffffff' },
     });
@@ -71,39 +79,18 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     const smtpFrom = `"${senderName}" <${process.env.SMTP_USER || 'test@example.com'}>`;
 
     const subject = `Your Ticket is Booked! - ${eventTitle}`;
-    const html = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 12px; background-color: #ffffff; color: #1e293b;">
-        <h2 style="color: #6366f1; margin-top: 0; font-size: 1.75rem;">🎉 Ticket Confirmation</h2>
-        <p>Hi <strong style="color: #0f172a;">${name}</strong>,</p>
-        <p>Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is successfully confirmed!</p>
-        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
-        <p style="margin: 0.5rem 0;"><strong>Tickets Quantity:</strong> ${quantity}</p>
-        <p style="margin: 0.5rem 0;"><strong>Booking ID:</strong> <code style="background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700;">${bookingId}</code></p>
-        <br/>
-        <p style="font-weight: 600; margin-bottom: 0.5rem;">Present this QR code at the event entrance:</p>
-        <div style="text-align: center; margin: 1.5rem 0;">
-          <img src="cid:ticket-qr" alt="Ticket QR Code" style="width: 220px; height: 220px; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" />
-        </div>
-        <p style="color: #64748b; font-size: 0.875rem; text-align: center; margin-top: 2rem;">Thank you for booking with Vibe Events!</p>
-      </div>
-    `;
 
-    const attachments = [
-      {
-        filename: 'ticket-qr.png',
-        content: Buffer.from(base64Data, 'base64'),
-        cid: 'ticket-qr',
-      },
-    ];
-
-    // ── Strategy: try Gmail SMTP first on localhost (allows sending to any email), default to Resend on production ──
+    // ── Strategy: Gmail SMTP on localhost (supports CID), Resend on production (base64 inline) ──
     const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
 
     if (!isProduction && process.env.SMTP_USER && process.env.SMTP_PASS) {
       try {
-        console.log('✉️ Local environment detected. Trying Gmail SMTP first (allows sending to any email)...');
+        console.log(`✉️ Local: Sending via Gmail SMTP to ${email}...`);
+        // SMTP supports CID inline images
+        const htmlWithCid = buildEmailHtml(name, eventTitle, quantity, bookingId, 'cid:ticket-qr');
+        const attachments = [{ filename: 'ticket-qr.png', content: Buffer.from(base64Data, 'base64'), cid: 'ticket-qr' }];
         const transporter = await getGmailTransporter();
-        const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html, attachments });
+        const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html: htmlWithCid, attachments });
         console.log('✅ Gmail email sent:', info.messageId);
         return null;
       } catch (err) {
@@ -112,21 +99,24 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     }
 
     if (process.env.RESEND_API_KEY) {
-      console.log('✉️ Sending via Resend HTTP API...');
-      const info = await sendViaResend(email, resendFrom, subject, html, attachments);
+      console.log(`✉️ Production: Sending via Resend to ${email}...`);
+      // Resend does NOT support CID – embed QR as base64 data URL directly in HTML
+      const htmlWithDataUrl = buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl);
+      const info = await sendViaResend(email, resendFrom, subject, htmlWithDataUrl);
       console.log('✅ Resend email sent:', info.id);
       return null;
     }
 
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      console.log('✉️ Sending via Gmail SMTP...');
+      console.log(`✉️ Sending via Gmail SMTP to ${email}...`);
+      const htmlWithCid = buildEmailHtml(name, eventTitle, quantity, bookingId, 'cid:ticket-qr');
+      const attachments = [{ filename: 'ticket-qr.png', content: Buffer.from(base64Data, 'base64'), cid: 'ticket-qr' }];
       const transporter = await getGmailTransporter();
-      const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html, attachments });
+      const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html: htmlWithCid, attachments });
       console.log('✅ Gmail email sent:', info.messageId);
       return null;
     }
 
-    // No credentials available – log and skip silently
     console.warn('⚠️ No email credentials (RESEND_API_KEY or SMTP_USER) found. Email skipped.');
     return null;
   } catch (error) {
