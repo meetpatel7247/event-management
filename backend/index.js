@@ -46,6 +46,43 @@ app.get(`${apiPrefix}/health`, (req, res) => {
   });
 });
 
+app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
+  const nodemailer = require('nodemailer');
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 8000,
+    });
+
+    await transporter.verify();
+    res.json({
+      status: 'success',
+      message: 'SMTP Connection is valid on Render!',
+      smtpUser: smtpUser || 'NOT_DEFINED',
+      smtpPassLength: smtpPass ? smtpPass.length : 0,
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'SMTP Test Failed on Render',
+      error: err.message,
+      code: err.code,
+      command: err.command,
+      smtpUser: smtpUser || 'NOT_DEFINED',
+      smtpPassLength: smtpPass ? smtpPass.length : 0,
+    });
+  }
+});
+
 app.get(`${apiPrefix}/status`, (req, res) => {
   res.json({
     message: 'Event Management API Overview',
