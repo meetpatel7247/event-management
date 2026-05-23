@@ -2,27 +2,39 @@ const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
 
 let cachedTransporter = null;
+let cachedTransporterType = null; // 'gmail', 'ethereal', or 'mock'
 let cachedTestAccount = null;
 
 async function getTransporter() {
-  if (cachedTransporter) {
-    return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER && cachedTestAccount };
-  }
-
   const smtpUser = process.env.SMTP_USER;
   const smtpPass = process.env.SMTP_PASS;
 
+  // Determine what type we expect based on active environment variables
+  let expectedType = 'ethereal';
   if (smtpUser && smtpPass) {
+    expectedType = 'gmail';
+  }
+
+  // If we have a cached transporter of the expected type, use it
+  if (cachedTransporter && cachedTransporterType === expectedType) {
+    return { transporter: cachedTransporter, isTest: expectedType !== 'gmail' && cachedTestAccount };
+  }
+
+  console.log(`✉️ Initializing transporter. Expected type: ${expectedType}`);
+
+  if (expectedType === 'gmail') {
     cachedTransporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: smtpUser,
         pass: smtpPass,
       },
-      connectionTimeout: 1500, // 1.5 seconds timeout
-      greetingTimeout: 1500,
-      socketTimeout: 3000,
+      connectionTimeout: 5000, // 5 seconds connection timeout for Gmail SMTP safety
+      greetingTimeout: 5000,
+      socketTimeout: 8000,
     });
+    cachedTransporterType = 'gmail';
+    cachedTestAccount = null;
   } else {
     try {
       // Race Ethereal account creation with a 2-second timeout
@@ -48,6 +60,7 @@ async function getTransporter() {
         greetingTimeout: 1500,
         socketTimeout: 3000,
       });
+      cachedTransporterType = 'ethereal';
     } catch (err) {
       console.warn('⚠️ Ethereal account creation failed/timed out. Falling back to Mock Transporter:', err.message);
       cachedTransporter = {
@@ -56,11 +69,12 @@ async function getTransporter() {
           return { messageId: 'mock-id-' + Date.now() };
         }
       };
+      cachedTransporterType = 'mock';
       cachedTestAccount = null;
     }
   }
 
-  return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER && cachedTestAccount };
+  return { transporter: cachedTransporter, isTest: cachedTransporterType !== 'gmail' && cachedTestAccount };
 }
 
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
