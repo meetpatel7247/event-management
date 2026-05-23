@@ -96,7 +96,21 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
       },
     ];
 
-    // ── Strategy: try Resend first (works on Render), fall back to Gmail SMTP ──
+    // ── Strategy: try Gmail SMTP first on localhost (allows sending to any email), default to Resend on production ──
+    const isProduction = process.env.NODE_ENV === 'production' || process.env.RENDER;
+
+    if (!isProduction && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        console.log('✉️ Local environment detected. Trying Gmail SMTP first (allows sending to any email)...');
+        const transporter = await getGmailTransporter();
+        const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html, attachments });
+        console.log('✅ Gmail email sent:', info.messageId);
+        return null;
+      } catch (err) {
+        console.warn('⚠️ SMTP failed, attempting Resend fallback...', err.message);
+      }
+    }
+
     if (process.env.RESEND_API_KEY) {
       console.log('✉️ Sending via Resend HTTP API...');
       const info = await sendViaResend(email, resendFrom, subject, html, attachments);
@@ -105,7 +119,7 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     }
 
     if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      console.log('✉️ Sending via Gmail SMTP (localhost)...');
+      console.log('✉️ Sending via Gmail SMTP...');
       const transporter = await getGmailTransporter();
       const info = await transporter.sendMail({ from: smtpFrom, to: email, subject, html, attachments });
       console.log('✅ Gmail email sent:', info.messageId);
