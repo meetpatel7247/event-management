@@ -14,7 +14,7 @@ const Register = () => {
     const [roleAvailability, setRoleAvailability] = useState({ admin: false, organizer: false });
 
     useEffect(() => {
-        if (user) navigate('/');
+        if (user) navigate('/', { replace: true });
     }, [user, navigate]);
 
     useEffect(() => {
@@ -43,7 +43,7 @@ const Register = () => {
 
             dispatch(loginAction(data));
             toast.success('Registration successful!');
-            navigate('/');
+            navigate('/', { replace: true });
         } catch (error) {
             const msg = error.response?.data?.message || 'Registration failed';
             setError(msg);

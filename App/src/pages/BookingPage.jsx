@@ -55,6 +55,13 @@ const BookingPage = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        if (user) {
+            if (!guestName) setGuestName(user.name || '');
+            if (!guestEmail) setGuestEmail(user.email || '');
+        }
+    }, [user]);
+
+    useEffect(() => {
         if (!bookingEvent && !bookingSuccess) {
             navigate('/');
         }

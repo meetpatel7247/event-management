@@ -22,11 +22,12 @@ const MyBookings = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
+        if (!user || !user.token) {
+            navigate('/login', { replace: true });
+            return;
+        }
+
         const fetchBookings = async () => {
-            if (!user || !user.token) {
-                setLoading(false);
-                return;
-            }
 
             try {
                 const data = await bookingApi.getUserBookings();

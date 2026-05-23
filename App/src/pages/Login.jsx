@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { login as loginAction } from '../store/authSlice';
 import { authApi } from '../utils/api';
 import { toast } from 'react-toastify';
@@ -14,6 +14,7 @@ import { toast } from 'react-toastify';
 const Login = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const user = useSelector((state) => state.auth.user);
     const [formData, setFormData] = useState({
         email: '',
         password: ''
@@ -21,6 +22,12 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
 
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (user) {
+            navigate(user.role === 'admin' ? '/admin' : user.role === 'organizer' ? '/organizer' : '/', { replace: true });
+        }
+    }, [user, navigate]);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -34,7 +41,7 @@ const Login = () => {
             const data = await authApi.login(formData.email, formData.password);
             dispatch(loginAction(data));
             toast.success(`Welcome back, ${data.name}!`);
-            navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/organizer' : '/');
+            navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/organizer' : '/', { replace: true });
         } catch (error) {
             toast.error(error.response?.data?.message || 'Invalid credentials');
         } finally {
