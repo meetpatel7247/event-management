@@ -54,41 +54,59 @@ app.get(`${apiPrefix}/health`, (req, res) => {
 });
 
 app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
-  const nodemailer = require('nodemailer');
+  const resendKey = process.env.RESEND_API_KEY;
   const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
 
   try {
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      connectionTimeout: 5000,
-      greetingTimeout: 5000,
-      socketTimeout: 8000,
-    });
+    if (resendKey) {
+      // Test Resend API reachability
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: `"Vibe Events" <${smtpUser || 'onboarding@resend.dev'}>`,
+          to: [process.env.TEST_EMAIL || smtpUser || 'test@example.com'],
+          subject: 'Vibe Events – SMTP Diagnostics Test',
+          html: '<p>SMTP Diagnostics test from Render. If you see this, Resend is working!</p>',
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        return res.status(500).json({
+          status: 'error',
+          method: 'resend',
+          message: 'Resend API call failed',
+          resendError: data,
+          resendKeyPresent: true,
+        });
+      }
+      return res.json({
+        status: 'success',
+        method: 'resend',
+        message: 'Resend API is working! Email sent.',
+        emailId: data.id,
+      });
+    }
 
-    await transporter.verify();
-    res.json({
-      status: 'success',
-      message: 'SMTP Connection is valid on Render!',
-      smtpUser: smtpUser || 'NOT_DEFINED',
-      smtpPassLength: smtpPass ? smtpPass.length : 0,
+    // Fallback: report no email credentials configured
+    return res.status(500).json({
+      status: 'error',
+      message: 'No email credentials found on this server',
+      resendKeyPresent: !!resendKey,
+      smtpUserPresent: !!smtpUser,
     });
   } catch (err) {
     res.status(500).json({
       status: 'error',
-      message: 'SMTP Test Failed on Render',
+      message: 'Email test failed',
       error: err.message,
-      code: err.code,
-      command: err.command,
-      smtpUser: smtpUser || 'NOT_DEFINED',
-      smtpPassLength: smtpPass ? smtpPass.length : 0,
     });
   }
 });
+
 
 app.get(`${apiPrefix}/status`, (req, res) => {
   res.json({

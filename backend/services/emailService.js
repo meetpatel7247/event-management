@@ -1,145 +1,124 @@
-const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
-const dns = require('dns');
 
-// Force Node to prioritize IPv4 DNS resolution over IPv6.
-// This prevents ENETUNREACH socket connection errors on container hosting networks like Render which don't support IPv6 outbound.
-if (dns && dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
+// ─── Resend HTTP API sender (works on Render – uses HTTPS port 443) ──────────
+async function sendViaResend(to, from, subject, html, attachments) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error('RESEND_API_KEY not set');
+
+  // Build payload – Resend supports base64 attachments
+  const payload = {
+    from,
+    to: [to],
+    subject,
+    html,
+  };
+
+  if (attachments && attachments.length > 0) {
+    payload.attachments = attachments.map((a) => ({
+      filename: a.filename,
+      content: a.content instanceof Buffer ? a.content.toString('base64') : a.content,
+    }));
+  }
+
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(`Resend API error ${response.status}: ${JSON.stringify(data)}`);
+  }
+  return data;
 }
 
+// ─── Nodemailer / Gmail SMTP sender (works on localhost only) ─────────────────
 let cachedTransporter = null;
-let cachedTransporterType = null; // 'gmail', 'ethereal', or 'mock'
-let cachedTestAccount = null;
+async function getGmailTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+  const nodemailer = require('nodemailer');
+  const dns = require('dns');
+  if (dns && dns.setDefaultResultOrder) dns.setDefaultResultOrder('ipv4first');
 
-async function getTransporter() {
-  const smtpUser = process.env.SMTP_USER;
-  const smtpPass = process.env.SMTP_PASS;
-
-  // Determine what type we expect based on active environment variables
-  let expectedType = 'ethereal';
-  if (smtpUser && smtpPass) {
-    expectedType = 'gmail';
-  }
-
-  // If we have a cached transporter of the expected type, use it
-  if (cachedTransporter && cachedTransporterType === expectedType) {
-    return { transporter: cachedTransporter, isTest: expectedType !== 'gmail' && cachedTestAccount };
-  }
-
-  console.log(`✉️ Initializing transporter. Expected type: ${expectedType}`);
-
-  if (expectedType === 'gmail') {
-    cachedTransporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      connectionTimeout: 5000, // 5 seconds connection timeout for Gmail SMTP safety
-      greetingTimeout: 5000,
-      socketTimeout: 8000,
-    });
-    cachedTransporterType = 'gmail';
-    cachedTestAccount = null;
-  } else {
-    try {
-      // Race Ethereal account creation with a 2-second timeout
-      console.log('🔄 Provisioning single Ethereal Test Account with 2s timeout...');
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Ethereal account creation timed out')), 2000)
-      );
-
-      cachedTestAccount = await Promise.race([
-        nodemailer.createTestAccount(),
-        timeoutPromise
-      ]);
-
-      cachedTransporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: cachedTestAccount.user, // generated ethereal user
-          pass: cachedTestAccount.pass, // generated ethereal password
-        },
-        connectionTimeout: 1500, // 1.5 seconds timeout
-        greetingTimeout: 1500,
-        socketTimeout: 3000,
-      });
-      cachedTransporterType = 'ethereal';
-    } catch (err) {
-      console.warn('⚠️ Ethereal account creation failed/timed out. Falling back to Mock Transporter:', err.message);
-      cachedTransporter = {
-        sendMail: async (options) => {
-          console.log('✉️ [Mock Email] Sending mock email to:', options.to);
-          return { messageId: 'mock-id-' + Date.now() };
-        }
-      };
-      cachedTransporterType = 'mock';
-      cachedTestAccount = null;
-    }
-  }
-
-  return { transporter: cachedTransporter, isTest: cachedTransporterType !== 'gmail' && cachedTestAccount };
+  cachedTransporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+    },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 8000,
+  });
+  return cachedTransporter;
 }
 
+// ─── Main entry point ─────────────────────────────────────────────────────────
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
   try {
-    // Generate QR Code as Data URI
+    // Generate QR Code as base64 PNG
     const qrDataUrl = await QRCode.toDataURL(bookingId.toString(), {
-      color: { dark: '#000000', light: '#ffffff' }
+      color: { dark: '#000000', light: '#ffffff' },
     });
+    const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, '');
 
-    const { transporter, isTest } = await getTransporter();
+    const senderName = process.env.SMTP_SENDER_NAME || 'Vibe Events';
+    const senderEmail = process.env.SMTP_USER || 'onboarding@resend.dev';
+    const fromField = `"${senderName}" <${senderEmail}>`;
 
-    // Extract base64 part of the QR code for standard CID attachment embedding
-    const base64Data = qrDataUrl.replace(/^data:image\/png;base64,/, "");
-
-    const smtpUser = process.env.SMTP_USER;
-    const mailOptions = {
-      from: smtpUser ? `"${process.env.SMTP_SENDER_NAME || 'Vibe Events'}" <${smtpUser}>` : '"Vibe Events" <noreply@vibeevents.com>',
-      to: email,
-      subject: `Your Ticket is Booked! - ${eventTitle}`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 12px; background-color: #ffffff; color: #1e293b;">
-          <h2 style="color: #6366f1; margin-top: 0; font-size: 1.75rem;">🎉 Ticket Confirmation</h2>
-          <p>Hi <strong style="color: #0f172a;">${name}</strong>,</p>
-          <p>Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is successfully confirmed!</p>
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
-          <p style="margin: 0.5rem 0;"><strong>Tickets Quantity:</strong> ${quantity}</p>
-          <p style="margin: 0.5rem 0;"><strong>Booking ID:</strong> <code style="background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700;">${bookingId}</code></p>
-          <br/>
-          <p style="font-weight: 600; margin-bottom: 0.5rem;">Present this QR code at the event entrance:</p>
-          <div style="text-align: center; margin: 1.5rem 0;">
-            <img src="cid:ticket-qr" alt="Ticket QR Code" style="width: 220px; height: 220px; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" />
-          </div>
-          <p style="color: #64748b; font-size: 0.875rem; text-align: center; margin-top: 2rem;">Thank you for booking with Vibe Events!</p>
+    const subject = `Your Ticket is Booked! - ${eventTitle}`;
+    const html = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 12px; background-color: #ffffff; color: #1e293b;">
+        <h2 style="color: #6366f1; margin-top: 0; font-size: 1.75rem;">🎉 Ticket Confirmation</h2>
+        <p>Hi <strong style="color: #0f172a;">${name}</strong>,</p>
+        <p>Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is successfully confirmed!</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
+        <p style="margin: 0.5rem 0;"><strong>Tickets Quantity:</strong> ${quantity}</p>
+        <p style="margin: 0.5rem 0;"><strong>Booking ID:</strong> <code style="background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 4px; font-weight: 700;">${bookingId}</code></p>
+        <br/>
+        <p style="font-weight: 600; margin-bottom: 0.5rem;">Present this QR code at the event entrance:</p>
+        <div style="text-align: center; margin: 1.5rem 0;">
+          <img src="cid:ticket-qr" alt="Ticket QR Code" style="width: 220px; height: 220px; border: 2px solid #e2e8f0; padding: 12px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);" />
         </div>
-      `,
-      attachments: [{
+        <p style="color: #64748b; font-size: 0.875rem; text-align: center; margin-top: 2rem;">Thank you for booking with Vibe Events!</p>
+      </div>
+    `;
+
+    const attachments = [
+      {
         filename: 'ticket-qr.png',
         content: Buffer.from(base64Data, 'base64'),
-        cid: 'ticket-qr'
-      }]
-    };
+        cid: 'ticket-qr',
+      },
+    ];
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Message sent: %s', info.messageId);
-
-    if (isTest) {
-      const previewUrl = nodemailer.getTestMessageUrl(info);
-      console.log('Preview URL: %s', previewUrl);
-      return previewUrl;
-    } else {
+    // ── Strategy: try Resend first (works on Render), fall back to Gmail SMTP ──
+    if (process.env.RESEND_API_KEY) {
+      console.log('✉️ Sending via Resend HTTP API...');
+      const info = await sendViaResend(email, fromField, subject, html, attachments);
+      console.log('✅ Resend email sent:', info.id);
       return null;
     }
+
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      console.log('✉️ Sending via Gmail SMTP (localhost)...');
+      const transporter = await getGmailTransporter();
+      const info = await transporter.sendMail({ from: fromField, to: email, subject, html, attachments });
+      console.log('✅ Gmail email sent:', info.messageId);
+      return null;
+    }
+
+    // No credentials available – log and skip silently
+    console.warn('⚠️ No email credentials (RESEND_API_KEY or SMTP_USER) found. Email skipped.');
+    return null;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ Error sending email:', error.message);
     return null;
   }
 }
 
-module.exports = {
-  sendBookingConfirmation
-};
+module.exports = { sendBookingConfirmation };
