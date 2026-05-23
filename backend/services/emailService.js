@@ -6,7 +6,7 @@ let cachedTestAccount = null;
 
 async function getTransporter() {
   if (cachedTransporter) {
-    return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER };
+    return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER && cachedTestAccount };
   }
 
   const smtpUser = process.env.SMTP_USER;
@@ -19,23 +19,48 @@ async function getTransporter() {
         user: smtpUser,
         pass: smtpPass,
       },
+      connectionTimeout: 1500, // 1.5 seconds timeout
+      greetingTimeout: 1500,
+      socketTimeout: 3000,
     });
   } else {
-    // Re-use a single test account created once
-    console.log('🔄 Provisioning single Ethereal Test Account...');
-    cachedTestAccount = await nodemailer.createTestAccount();
-    cachedTransporter = nodemailer.createTransport({
-      host: 'smtp.ethereal.email',
-      port: 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: cachedTestAccount.user, // generated ethereal user
-        pass: cachedTestAccount.pass, // generated ethereal password
-      },
-    });
+    try {
+      // Race Ethereal account creation with a 2-second timeout
+      console.log('🔄 Provisioning single Ethereal Test Account with 2s timeout...');
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Ethereal account creation timed out')), 2000)
+      );
+
+      cachedTestAccount = await Promise.race([
+        nodemailer.createTestAccount(),
+        timeoutPromise
+      ]);
+
+      cachedTransporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: cachedTestAccount.user, // generated ethereal user
+          pass: cachedTestAccount.pass, // generated ethereal password
+        },
+        connectionTimeout: 1500, // 1.5 seconds timeout
+        greetingTimeout: 1500,
+        socketTimeout: 3000,
+      });
+    } catch (err) {
+      console.warn('⚠️ Ethereal account creation failed/timed out. Falling back to Mock Transporter:', err.message);
+      cachedTransporter = {
+        sendMail: async (options) => {
+          console.log('✉️ [Mock Email] Sending mock email to:', options.to);
+          return { messageId: 'mock-id-' + Date.now() };
+        }
+      };
+      cachedTestAccount = null;
+    }
   }
 
-  return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER };
+  return { transporter: cachedTransporter, isTest: !process.env.SMTP_USER && cachedTestAccount };
 }
 
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
