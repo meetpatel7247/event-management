@@ -7,9 +7,11 @@
     // GitHub Pages SPA redirect hack
     // Converts the 404 path into a query string that index.html can read and restore
     var l = window.location;
+    var segmentCount = 1; // Since it is hosted at /event-management/
     l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') + l.pathname.split('/').slice(0, 1).join('/') +
-      '/?/' + l.pathname.slice(1).replace(/&/g, '~and~') +
+      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+      l.pathname.split('/').slice(0, segmentCount + 1).join('/') +
+      '/?/' + l.pathname.split('/').slice(segmentCount + 1).join('/').replace(/&/g, '~and~') +
       (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
       l.hash
     );
