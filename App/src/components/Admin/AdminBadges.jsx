@@ -9,9 +9,10 @@ export function RoleBadge({ role }) {
   return <span className="adm-badge" style={styles[role] || styles.user}>{role}</span>;
 }
 
-export function StatusBadge({ approved, past, hasPendingEdits }) {
+export function StatusBadge({ approved, past, hasPendingEdits, rejected }) {
   if (past)            return <span className="adm-badge" style={{ background:'rgba(100,116,139,0.15)', color:'#94a3b8', border:'1px solid rgba(100,116,139,0.3)' }}>past</span>;
   if (hasPendingEdits) return <span className="adm-badge" style={{ background:'rgba(59,130,246,0.15)', color:'#3b82f6', border:'1px solid rgba(59,130,246,0.3)' }}>pending edits</span>;
   if (approved)        return <span className="adm-badge" style={{ background:'rgba(16,185,129,0.15)', color:'#10b981', border:'1px solid rgba(16,185,129,0.3)' }}>approved</span>;
+  if (rejected)        return <span className="adm-badge" style={{ background:'rgba(239,68,68,0.15)', color:'#ef4444', border:'1px solid rgba(239,68,68,0.3)' }}>rejected</span>;
   return               <span className="adm-badge" style={{ background:'rgba(245,158,11,0.15)', color:'#f59e0b', border:'1px solid rgba(245,158,11,0.3)' }}>pending</span>;
 }

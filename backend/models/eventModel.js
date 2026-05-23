@@ -69,6 +69,10 @@ const EventSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  isRejected: {
+    type: Boolean,
+    default: false,
+  },
   tempEdits: {
     type: mongoose.Schema.Types.Mixed,
     default: null,

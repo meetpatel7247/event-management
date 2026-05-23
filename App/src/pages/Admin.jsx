@@ -50,7 +50,7 @@ const Admin = () => {
 
   /* ── derived stats ── */
   const totalRevenue    = useMemo(() => bookings.reduce((s, b) => s + (b.totalPrice || 0), 0), [bookings]);
-  const pendingEvents   = useMemo(() => events.filter(e => !e.isApproved || e.hasPendingEdits), [events]);
+  const pendingEvents   = useMemo(() => events.filter(e => (!e.isApproved && !e.isRejected) || e.hasPendingEdits), [events]);
   const activeOrgs      = useMemo(() => users.filter(u => u.role === 'organizer').length, [users]);
   const platformUsers   = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
 
@@ -110,16 +110,16 @@ const Admin = () => {
   const handleApprove = async (id) => {
     try {
       await adminApi.approveEvent(id);
-      setEvents(ev => ev.map(e => e._id === id ? { ...e, isApproved: true } : e));
+      setEvents(ev => ev.map(e => e._id === id ? { ...e, isApproved: true, isRejected: false } : e));
       toast.success('Event approved!');
     } catch (e) { toast.error(e.response?.data?.message || 'Approval failed'); }
   };
 
   const handleRejectEvent = async (id) => {
     try {
-      await eventApi.deleteEvent(id);
-      setEvents(ev => ev.filter(e => e._id !== id));
-      toast.success('Event rejected & removed.');
+      await eventApi.updateEvent(id, { isRejected: true });
+      setEvents(ev => ev.map(e => e._id === id ? { ...e, isApproved: false, isRejected: true, hasPendingEdits: false, tempEdits: null } : e));
+      toast.success('Event rejected.');
     } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
   };
 
@@ -149,8 +149,9 @@ const Admin = () => {
   /* ── filtered lists ── */
   const filteredEvents = useMemo(() => {
     let list = events;
-    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved || e.hasPendingEdits);
+    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved && !e.isRejected);
     if (eventFilter === 'Approved') list = list.filter(e => e.isApproved);
+    if (eventFilter === 'Rejected') list = list.filter(e => e.isRejected);
     if (eventSearch) list = list.filter(e => e.title?.toLowerCase().includes(eventSearch.toLowerCase()));
     return list;
   }, [events, eventFilter, eventSearch]);

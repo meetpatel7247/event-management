@@ -20,7 +20,7 @@ export default function AdminEvents({
               value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
           </div>
           <div className="adm-filter-group" style={{ margin: 0 }}>
-            {['All','Pending','Approved'].map(f => (
+            {['All','Pending','Approved','Rejected'].map(f => (
               <button key={f}
                 className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
                 onClick={() => setEventFilter(f)}>{f}</button>
@@ -99,20 +99,22 @@ export default function AdminEvents({
                     </div>
                   </td>
                   <td>{new Date(ev.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-                  <td><StatusBadge approved={ev.isApproved} past={isPast} hasPendingEdits={ev.hasPendingEdits} /></td>
+                  <td><StatusBadge approved={ev.isApproved} past={isPast} hasPendingEdits={ev.hasPendingEdits} rejected={ev.isRejected} /></td>
                   <td style={{ color:'#fb7185', fontWeight:600 }}>{ev.likes || 0}</td>
                   <td style={{ color:'#60a5fa', fontWeight:600 }}>{ev.shares || 0}</td>
                   <td style={{ color:'#10b981', fontWeight:600 }}>₹{rev.toFixed(1)}</td>
                   <td>
                     <div className="adm-row-actions">
                       <button className="adm-icon-btn adm-icon-view" title="View" onClick={() => navigate(`/event/${ev._id}`)}>👁</button>
-                      {(!ev.isApproved || ev.hasPendingEdits) && (
+                      {(!ev.isApproved || ev.hasPendingEdits || ev.isRejected) && (
                         <button className="adm-icon-btn adm-icon-approve" title="Approve" onClick={() => handleApprove(ev._id)}>✓</button>
                       )}
                       {ev.hasPendingEdits ? (
                         <button className="adm-icon-btn adm-icon-reject" title="Reject Edits" onClick={() => handleRejectEdits(ev._id)}>✕</button>
                       ) : (
-                        <button className="adm-icon-btn adm-icon-reject" title="Delete" onClick={() => handleRejectEvent(ev._id)}>✕</button>
+                        !ev.isRejected && (
+                          <button className="adm-icon-btn adm-icon-reject" title="Reject" onClick={() => handleRejectEvent(ev._id)}>✕</button>
+                        )
                       )}
                     </div>
                   </td>

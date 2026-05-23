@@ -130,6 +130,7 @@ async function updateEvent(req, res, next) {
     if (req.user.role === 'admin') {
       const isApproveRequest = payload.isApproved === true || payload.isApproved === 'true';
       const isRejectRequest = payload.rejectEdits === true || payload.rejectEdits === 'true';
+      const isRejectEventRequest = payload.isRejected === true || payload.isRejected === 'true';
 
       if (isApproveRequest) {
         if (event.hasPendingEdits && event.tempEdits) {
@@ -139,11 +140,19 @@ async function updateEvent(req, res, next) {
           event.hasPendingEdits = false;
         }
         event.isApproved = true;
+        event.isRejected = false;
         await event.save();
         return res.json(event);
       } else if (isRejectRequest) {
         event.tempEdits = null;
         event.hasPendingEdits = false;
+        await event.save();
+        return res.json(event);
+      } else if (isRejectEventRequest) {
+        event.isApproved = false;
+        event.isRejected = true;
+        event.hasPendingEdits = false;
+        event.tempEdits = null;
         await event.save();
         return res.json(event);
       } else {
@@ -199,6 +208,10 @@ async function updateEvent(req, res, next) {
           event
         });
       } else {
+        if (event.isRejected) {
+          payload.isRejected = false;
+          payload.isApproved = false;
+        }
         const updated = await eventService.updateEvent(req.params.id, payload);
         return res.json(updated);
       }

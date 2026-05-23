@@ -8,8 +8,9 @@ import OrgMyEvents from '../components/Organizer/OrgMyEvents';
 import OrgCalendar from '../components/Organizer/OrgCalendar';
 import OrgAnalytics from '../components/Organizer/OrgAnalytics';
 import Spinner from '../components/Spinner/Spinner';
+import OrgHistory from '../components/Organizer/OrgHistory';
 
-const TABS = ['Overview', 'My Events', 'Calendar', 'Analytics'];
+const TABS = ['Overview', 'My Events', 'History', 'Calendar', 'Analytics'];
 
 const Organizer = () => {
   const userInfo = JSON.parse(sessionStorage.getItem('user'));
@@ -135,6 +136,7 @@ const Organizer = () => {
           >
             {tab === 'Overview' && '📊 '}
             {tab === 'My Events' && `🗂 `}
+            {tab === 'History' && '📜 '}
             {tab === 'Calendar' && '📅 '}
             {tab === 'Analytics' && '📈 '}
             {tab}
@@ -159,6 +161,12 @@ const Organizer = () => {
           events={events} bookings={bookings}
           handleCreateEvent={handleCreateEvent} handleUpdateEvent={handleUpdateEvent}
           handleDeleteEvent={handleDeleteEvent} openEdit={openEdit}
+        />
+      )}
+
+      {activeTab === 'History' && (
+        <OrgHistory
+          events={events} bookings={bookings} setActiveTab={setActiveTab}
         />
       )}
 
