@@ -1,6 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const dns = require('dns');
+
+// Enforce global IPv4 resolution preference in Node
+if (dns && dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
+
 // Env variables loaded correctly
 require("dotenv").config();
 const mongoose = require('mongoose');

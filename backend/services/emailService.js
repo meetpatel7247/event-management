@@ -1,5 +1,12 @@
 const nodemailer = require('nodemailer');
 const QRCode = require('qrcode');
+const dns = require('dns');
+
+// Force Node to prioritize IPv4 DNS resolution over IPv6.
+// This prevents ENETUNREACH socket connection errors on container hosting networks like Render which don't support IPv6 outbound.
+if (dns && dns.setDefaultResultOrder) {
+  dns.setDefaultResultOrder('ipv4first');
+}
 
 let cachedTransporter = null;
 let cachedTransporterType = null; // 'gmail', 'ethereal', or 'mock'
