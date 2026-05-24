@@ -50,7 +50,8 @@ const BookingPage = () => {
 
     const [guestName, setGuestName] = useState(user?.name || '');
     const [guestEmail, setGuestEmail] = useState(user?.email || '');
-    const [emailPreviewUrl, setEmailPreviewUrl] = useState(null);
+    const [emailSent, setEmailSent] = useState(false);
+    const [emailError, setEmailError] = useState(null);
     const [bookingSuccess, setBookingSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -123,8 +124,12 @@ const BookingPage = () => {
             });
 
             toast.success('Ticket booked successfully!');
-            if (res && res.emailPreviewUrl) {
-                setEmailPreviewUrl(res.emailPreviewUrl);
+            setEmailSent(!!res?.emailSent);
+            setEmailError(res?.emailError || null);
+            if (res?.emailSent) {
+                toast.info(`Confirmation email sent to ${guestEmail}`);
+            } else if (res?.emailError) {
+                toast.warn(res.emailError);
             }
             setBookingSuccess(true);
         } catch (error) {
@@ -154,24 +159,31 @@ const BookingPage = () => {
                 {bookingSuccess ? (
                     <div style={{ textAlign: 'center' }}>
                         <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#10b981' }}>🎉 Ticket Booked!</h2>
-                        <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
-                            We've sent your {ticketType} ticket with a QR code directly to your email:
-                        </p>
-                        <p style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '1.1rem', marginBottom: '2rem' }}>
-                            {guestEmail}
-                        </p>
-                        {emailPreviewUrl && (
+                        {emailSent ? (
                             <>
-                                <a
-                                    href={emailPreviewUrl}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="premium-button"
-                                    style={{ display: 'inline-block', marginBottom: '2rem' }}
-                                >
-                                    View Demo Email & QR Code
-                                </a>
-                                <br />
+                                <p style={{ marginBottom: '1rem', color: 'var(--text-muted)' }}>
+                                    We've sent your {ticketType} ticket with a QR code to:
+                                </p>
+                                <p style={{ fontWeight: 700, color: 'var(--primary-color)', fontSize: '1.1rem', marginBottom: '2rem' }}>
+                                    {guestEmail}
+                                </p>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                    Check your inbox and spam folder. It may take a minute to arrive.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p style={{ marginBottom: '1rem', color: '#f59e0b' }}>
+                                    Your booking is saved, but we could not send the confirmation email.
+                                </p>
+                                {emailError && (
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>
+                                        {emailError}
+                                    </p>
+                                )}
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '2rem' }}>
+                                    You can still view your ticket under My Bookings. If this keeps happening, contact support.
+                                </p>
                             </>
                         )}
                         <button

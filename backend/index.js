@@ -54,49 +54,40 @@ app.get(`${apiPrefix}/health`, (req, res) => {
 });
 
 app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
-  const resendKey = process.env.RESEND_API_KEY;
-  const smtpUser = process.env.SMTP_USER;
+  const emailService = require('./services/emailService');
+  const to = (req.query.to || process.env.TEST_EMAIL || process.env.SMTP_USER || '').trim();
+
+  if (!to) {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Pass ?to=your@email.com or set TEST_EMAIL on the server',
+    });
+  }
 
   try {
-    if (resendKey) {
-      // Test Resend API reachability
-      const response = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: '"Vibe Events" <onboarding@resend.dev>',
-          to: [process.env.TEST_EMAIL || smtpUser || 'test@example.com'],
-          subject: 'Vibe Events – SMTP Diagnostics Test',
-          html: '<p>SMTP Diagnostics test from Render. If you see this, Resend is working!</p>',
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        return res.status(500).json({
-          status: 'error',
-          method: 'resend',
-          message: 'Resend API call failed',
-          resendError: data,
-          resendKeyPresent: true,
-        });
-      }
+    const result = await emailService.sendBookingConfirmation(
+      to,
+      'Test User',
+      'Email Health Check',
+      1,
+      'test-booking-id'
+    );
+
+    if (result.success) {
       return res.json({
         status: 'success',
-        method: 'resend',
-        message: 'Resend API is working! Email sent.',
-        emailId: data.id,
+        message: `Test email sent to ${to}`,
+        provider: result.provider,
+        messageId: result.messageId,
       });
     }
 
-    // Fallback: report no email credentials configured
     return res.status(500).json({
       status: 'error',
-      message: 'No email credentials found on this server',
-      resendKeyPresent: !!resendKey,
-      smtpUserPresent: !!smtpUser,
+      message: result.error || 'Email send failed',
+      brevoKeyPresent: !!process.env.BREVO_API_KEY,
+      smtpConfigured: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
+      resendKeyPresent: !!process.env.RESEND_API_KEY,
     });
   } catch (err) {
     res.status(500).json({

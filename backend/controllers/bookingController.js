@@ -9,16 +9,37 @@ async function createBooking(req, res, next) {
     const { eventId, quantity, totalPrice, guestName, guestEmail, ticketType } = req.body;
     const userId = req.user.userId;
     const booking = await bookingService.createBooking({ userId, eventId, quantity, totalPrice, ticketType });
-    
-    let emailPreviewUrl = null;
-    if (guestName && guestEmail) {
+
+    const recipientEmail = emailService.normalizeEmail(guestEmail);
+    const recipientName = (guestName || '').trim() || 'Guest';
+
+    let emailSent = false;
+    let emailError = null;
+
+    if (!recipientEmail) {
+      emailError = 'Email address is required to send your ticket.';
+    } else if (!emailService.isValidEmail(recipientEmail)) {
+      emailError = 'Please enter a valid email address.';
+    } else {
       const event = await eventService.findEventById(eventId);
-      emailPreviewUrl = await emailService.sendBookingConfirmation(
-        guestEmail, guestName, event?.title || 'Event', quantity, booking._id
+      const result = await emailService.sendBookingConfirmation(
+        recipientEmail,
+        recipientName,
+        event?.title || 'Event',
+        quantity,
+        booking._id
       );
+      emailSent = result.success;
+      emailError = result.success ? null : (result.error || 'Could not send confirmation email');
     }
-    
-    res.status(201).json({ ...booking.toObject(), emailPreviewUrl });
+
+    res.status(201).json({
+      ...booking.toObject(),
+      guestEmail: recipientEmail || undefined,
+      guestName: recipientName,
+      emailSent,
+      emailError,
+    });
   } catch (err) {
     next(err);
   }
