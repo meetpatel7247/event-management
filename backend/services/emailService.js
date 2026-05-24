@@ -123,7 +123,7 @@ async function getBrevoSmtpTransporter() {
 
   cachedBrevoTransporter = nodemailer.createTransport({
     host: 'smtp-relay.brevo.com',
-    port: 587,
+    port: 2525,
     secure: false,
     auth: { user: smtpLogin, pass: smtpKey },
     connectionTimeout: 10000,
