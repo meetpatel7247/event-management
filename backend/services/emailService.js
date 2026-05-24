@@ -93,12 +93,69 @@ async function buildQrDataUrl(bookingId) {
 }
 
 
-function getBrevoKey() {
-  return stripEnv(process.env.BREVO_API_KEY);
+function isCloudHost() {
+  return !!(
+    process.env.RAILWAY_ENVIRONMENT ||
+    process.env.RAILWAY_SERVICE_ID ||
+    process.env.RAILWAY_PROJECT_ID ||
+    process.env.RAILWAY_PUBLIC_DOMAIN ||
+    process.env.RENDER ||
+    process.env.VERCEL ||
+    process.env.FLY_APP_NAME
+  );
+}
+
+/** Brevo sometimes shows a base64 JSON blob — extract xkeysib- from it */
+function normalizeBrevoHttpKey(raw) {
+  const value = stripEnv(raw);
+  if (!value) return '';
+  if (isBrevoHttpKey(value)) return value;
+
+  if (value.startsWith('eyJ')) {
+    try {
+      const json = JSON.parse(Buffer.from(value, 'base64').toString('utf8'));
+      if (json.api_key && isBrevoHttpKey(json.api_key)) return stripEnv(json.api_key);
+    } catch (_) {
+      /* not valid base64 json */
+    }
+  }
+
+  return '';
 }
 
 function isBrevoSmtpKey(key) {
   return key.startsWith('xsmtpsib-');
+}
+
+function isBrevoHttpKey(key) {
+  return key.startsWith('xkeysib-');
+}
+
+/** HTTP API key (xkeysib) — works on Railway; SMTP ports are blocked there */
+function getBrevoHttpKey() {
+  const fromDedicated = normalizeBrevoHttpKey(process.env.BREVO_HTTP_API_KEY);
+  if (fromDedicated) return fromDedicated;
+  return normalizeBrevoHttpKey(process.env.BREVO_API_KEY);
+}
+
+function getBrevoHttpKeySetupError() {
+  const raw = stripEnv(process.env.BREVO_HTTP_API_KEY);
+  if (raw && !normalizeBrevoHttpKey(raw)) {
+    return 'BREVO_HTTP_API_KEY is wrong. Paste the xkeysib-... key OR the eyJ base64 blob from Brevo (we decode it automatically after redeploy).';
+  }
+  if (!getBrevoHttpKey() && isCloudHost()) {
+    return 'Add BREVO_HTTP_API_KEY on Railway (xkeysib-... from Brevo → API Keys).';
+  }
+  return '';
+}
+
+/** SMTP relay key (xsmtpsib) — works on localhost only; blocked on Railway */
+function getBrevoSmtpKey() {
+  const dedicated = stripEnv(process.env.BREVO_SMTP_KEY);
+  if (dedicated) return dedicated;
+  const legacy = stripEnv(process.env.BREVO_API_KEY);
+  if (legacy && isBrevoSmtpKey(legacy)) return legacy;
+  return '';
 }
 
 function getBrevoSmtpLogin() {
@@ -115,10 +172,10 @@ let cachedBrevoTransporter = null;
 async function getBrevoSmtpTransporter() {
   if (cachedBrevoTransporter) return cachedBrevoTransporter;
   const nodemailer = require('nodemailer');
-  const smtpKey = getBrevoKey();
+  const smtpKey = getBrevoSmtpKey();
   const smtpLogin = getBrevoSmtpLogin();
   if (!smtpKey || !smtpLogin) {
-    throw new Error('BREVO_API_KEY (xsmtpsib) and BREVO_SENDER_EMAIL or SMTP_USER are required');
+    throw new Error('BREVO_SMTP_KEY (xsmtpsib) and BREVO_SMTP_LOGIN are required');
   }
 
   cachedBrevoTransporter = nodemailer.createTransport({
@@ -166,8 +223,12 @@ async function sendViaBrevoSmtp(to, subject, html) {
 
 // ─── 1b. Brevo HTTP API (xkeysib- keys from Brevo → API Keys) ────────────────
 async function sendViaBrevoApi(to, toName, subject, html) {
-  const apiKey = getBrevoKey();
-  if (!apiKey) throw new Error('BREVO_API_KEY not set');
+  const apiKey = getBrevoHttpKey();
+  if (!apiKey) {
+    throw new Error(
+      'BREVO_HTTP_API_KEY not set. In Brevo go to SMTP & API → API Keys, create a key (starts with xkeysib-), add it on Railway.'
+    );
+  }
 
   const senderEmail = getSenderEmail();
   if (!senderEmail) {
@@ -198,10 +259,21 @@ async function sendViaBrevoApi(to, toName, subject, html) {
 }
 
 async function sendViaBrevo(to, toName, subject, html) {
-  if (isBrevoSmtpKey(getBrevoKey())) {
+  const setupError = getBrevoHttpKeySetupError();
+  if (setupError) throw new Error(setupError);
+
+  if (getBrevoHttpKey()) {
+    return sendViaBrevoApi(to, toName, subject, html);
+  }
+  if (isCloudHost()) {
+    throw new Error(
+      'Add BREVO_HTTP_API_KEY on Railway with your xkeysib-... key from Brevo → API Keys (SMTP is blocked on cloud).'
+    );
+  }
+  if (getBrevoSmtpKey()) {
     return sendViaBrevoSmtp(to, subject, html);
   }
-  return sendViaBrevoApi(to, toName, subject, html);
+  throw new Error('No Brevo credentials configured');
 }
 
 // ─── 2. Gmail SMTP (works on localhost; often blocked on cloud hosts) ─────────
@@ -269,9 +341,10 @@ async function sendViaResend(to, subject, html) {
 
 function hasAnyEmailProvider() {
   return !!(
-    process.env.BREVO_API_KEY ||
-    (process.env.SMTP_USER && process.env.SMTP_PASS) ||
-    process.env.RESEND_API_KEY
+    getBrevoHttpKey() ||
+    getBrevoSmtpKey() ||
+    (stripEnv(process.env.SMTP_USER) && stripEnv(process.env.SMTP_PASS)) ||
+    stripEnv(process.env.RESEND_API_KEY)
   );
 }
 
@@ -302,7 +375,11 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
 
     const failures = [];
 
-    if (getBrevoKey()) {
+    const hasBrevoHttp = !!getBrevoHttpKey();
+    const hasBrevoSmtp = !!getBrevoSmtpKey();
+    const brevoSetupError = getBrevoHttpKeySetupError();
+
+    if (hasBrevoHttp || hasBrevoSmtp || brevoSetupError) {
       attempts.push({
         name: 'brevo',
         run: async () => {
@@ -314,7 +391,8 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
       });
     }
 
-    if (stripEnv(process.env.SMTP_USER) && stripEnv(process.env.SMTP_PASS)) {
+    // SMTP is blocked on Railway/Render — skip to avoid 10s+ timeouts
+    if (!isCloudHost() && stripEnv(process.env.SMTP_USER) && stripEnv(process.env.SMTP_PASS)) {
       attempts.push({
         name: 'gmail',
         run: async () => {
@@ -367,4 +445,7 @@ module.exports = {
   isValidEmail,
   normalizeEmail,
   hasAnyEmailProvider,
+  isCloudHost,
+  getBrevoHttpKey,
+  getBrevoHttpKeySetupError,
 };

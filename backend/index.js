@@ -93,7 +93,10 @@ app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
     return res.status(500).json({
       status: 'error',
       message: result.error || 'Email send failed',
-      brevoKeyPresent: !!process.env.BREVO_API_KEY,
+      brevoHttpKeyPresent: !!emailService.getBrevoHttpKey(),
+      brevoHttpKeyError: emailService.getBrevoHttpKeySetupError?.() || undefined,
+      brevoSmtpKeyPresent: !!(process.env.BREVO_SMTP_KEY || process.env.BREVO_API_KEY),
+      cloudHost: emailService.isCloudHost(),
       smtpConfigured: !!(process.env.SMTP_USER && process.env.SMTP_PASS),
       resendKeyPresent: !!process.env.RESEND_API_KEY,
     });
