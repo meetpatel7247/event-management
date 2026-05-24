@@ -89,7 +89,7 @@ function buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl) {
 }
 
 async function buildQrDataUrl(bookingId) {
-  return QRCode.toDataURL(String(bookingId), { width: 200, margin: 2 });
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=1&data=${encodeURIComponent(String(bookingId))}`;
 }
 
 
