@@ -74,12 +74,20 @@ app.get(`${apiPrefix}/health/test-email`, async (req, res) => {
     );
 
     if (result.success) {
-      return res.json({
+      const payload = {
         status: 'success',
         message: `Test email sent to ${to}`,
         provider: result.provider,
         messageId: result.messageId,
-      });
+      };
+      if (result.failures?.length) {
+        payload.warnings = result.failures;
+        payload.hint =
+          result.provider !== 'brevo-smtp' && result.provider !== 'brevo-api'
+            ? 'Primary Brevo failed; email sent via fallback. Fix Brevo for customer booking emails.'
+            : undefined;
+      }
+      return res.json(payload);
     }
 
     return res.status(500).json({

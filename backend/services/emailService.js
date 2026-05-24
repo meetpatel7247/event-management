@@ -2,8 +2,17 @@ const QRCode = require('qrcode');
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function stripEnv(value) {
+  let v = String(value || '').trim();
+  // Railway row editor sometimes saves values wrapped in quotes — strip repeatedly
+  while (/^["']/.test(v) && /["']$/.test(v) && v.length >= 2) {
+    v = v.slice(1, -1).trim();
+  }
+  return v.replace(/^["']+|["']+$/g, '');
+}
+
 function normalizeEmail(email) {
-  return String(email || '').trim().toLowerCase();
+  return stripEnv(email).toLowerCase();
 }
 
 function isValidEmail(email) {
@@ -11,12 +20,12 @@ function isValidEmail(email) {
 }
 
 function getSenderEmail() {
-  return (
+  return stripEnv(
     process.env.BREVO_SENDER_EMAIL ||
     process.env.SMTP_USER ||
     process.env.RESEND_FROM_EMAIL ||
     ''
-  ).trim();
+  );
 }
 
 function getSenderName() {
@@ -24,32 +33,68 @@ function getSenderName() {
 }
 
 // ─── Build HTML with QR embedded as base64 data URL ───────────────────────────
+function getClientUrl() {
+  return stripEnv(process.env.CLIENT_URL || 'https://meetpatel7247.github.io/event-management');
+}
+
 function buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl) {
   const safeName = name || 'Guest';
+  const clientUrl = getClientUrl();
+  const ticketUrl = `${clientUrl}/my-bookings`;
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2rem; border-radius: 12px; background-color: #ffffff; color: #1e293b;">
-      <h2 style="color: #6366f1; margin-top: 0; font-size: 1.75rem;">🎉 Ticket Confirmation</h2>
-      <p>Hi <strong style="color: #0f172a;">${safeName}</strong>,</p>
-      <p>Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is confirmed!</p>
-      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 1.5rem 0;" />
-      <p style="margin: 0.5rem 0;"><strong>Tickets:</strong> ${quantity}</p>
-      <p style="margin: 0.5rem 0;"><strong>Booking ID:</strong> <code style="background:#f1f5f9; padding:0.2rem 0.4rem; border-radius:4px; font-weight:700;">${bookingId}</code></p>
-      <br/>
-      <p style="font-weight: 600; margin-bottom: 0.5rem;">Present this QR code at the event entrance:</p>
-      <div style="text-align: center; margin: 1.5rem 0;">
-        <img src="${qrDataUrl}" alt="Ticket QR Code" style="width:220px; height:220px; border:2px solid #e2e8f0; padding:12px; border-radius:12px;" />
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e2e8f0; padding: 2.5rem; border-radius: 16px; background-color: #ffffff; color: #1e293b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <span style="font-size: 3rem;">🎉</span>
+        <h2 style="color: #6366f1; margin: 0.5rem 0 0 0; font-size: 1.85rem; font-weight: 800; letter-spacing: -0.025em;">Ticket Confirmation</h2>
+        <p style="color: #64748b; margin: 0.25rem 0 0 0; font-size: 0.95rem;">Your reservation is secured!</p>
       </div>
-      <p style="color:#64748b; font-size:0.875rem; text-align:center; margin-top:2rem;">Thank you for booking with Vibe Events!</p>
+
+      <p style="font-size: 1.05rem; line-height: 1.6;">Hi <strong style="color: #0f172a;">${safeName}</strong>,</p>
+      <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 1.5rem;">Your booking for <strong style="color: #6366f1;">${eventTitle}</strong> is successfully confirmed. Here are your booking details:</p>
+      
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 0.5rem 0; color: #64748b; font-size: 0.95rem;">Event</td>
+            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${eventTitle}</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.5rem 0; color: #64748b; font-size: 0.95rem;">Tickets Count</td>
+            <td style="padding: 0.5rem 0; text-align: right; font-weight: 700; color: #0f172a; font-size: 0.95rem;">${quantity}x</td>
+          </tr>
+          <tr>
+            <td style="padding: 0.5rem 0; color: #64748b; font-size: 0.95rem;">Booking ID</td>
+            <td style="padding: 0.5rem 0; text-align: right; font-family: monospace; font-weight: 700; color: #6366f1; font-size: 0.95rem;">${bookingId}</td>
+          </tr>
+        </table>
+      </div>
+      
+      <div style="text-align: center; margin: 2rem 0; padding: 1.5rem; background: #faf5ff; border: 1px dashed #d8b4fe; border-radius: 12px;">
+        <p style="font-weight: 700; color: #7c3aed; margin-top: 0; margin-bottom: 0.75rem; font-size: 1rem;">🎟️ Live Digital Ticket & QR Entrance Pass</p>
+        <p style="color: #6b21a8; font-size: 0.875rem; margin-bottom: 1.25rem; line-height: 1.5;">Present the QR code below at the event gates or click the button to view your live tickets online.</p>
+        <div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 1.5rem;">
+          <img src="${qrDataUrl}" alt="Ticket QR Code" style="width:200px; height:200px; display: block;" />
+        </div>
+        <div>
+          <a href="${ticketUrl}" target="_blank" style="display: inline-block; background-color: #6366f1; color: #ffffff; padding: 0.85rem 2rem; font-weight: 700; text-decoration: none; border-radius: 9999px; font-size: 0.95rem; box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4), 0 2px 4px -1px rgba(99, 102, 241, 0.2); transition: all 0.2s;">
+            View Ticket & Bookings Online →
+          </a>
+        </div>
+      </div>
+      
+      <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+      <p style="color:#64748b; font-size:0.875rem; text-align:center; margin:0; line-height: 1.5;">Thank you for booking with <strong style="color: #4f46e5;">Vibe Events</strong>!<br/>If you have any questions, simply reply to this email.</p>
     </div>
   `;
 }
 
 async function buildQrDataUrl(bookingId) {
-  return QRCode.toDataURL(String(bookingId), { width: 220, margin: 2 });
+  return QRCode.toDataURL(String(bookingId), { width: 200, margin: 2 });
 }
 
+
 function getBrevoKey() {
-  return (process.env.BREVO_API_KEY || '').trim();
+  return stripEnv(process.env.BREVO_API_KEY);
 }
 
 function isBrevoSmtpKey(key) {
@@ -57,12 +102,12 @@ function isBrevoSmtpKey(key) {
 }
 
 function getBrevoSmtpLogin() {
-  return (
+  return stripEnv(
     process.env.BREVO_SMTP_LOGIN ||
     process.env.BREVO_SENDER_EMAIL ||
     process.env.SMTP_USER ||
     ''
-  ).trim();
+  );
 }
 
 // ─── 1a. Brevo SMTP relay (xsmtpsib- keys from Brevo → SMTP & API) ───────────
@@ -172,8 +217,8 @@ async function getGmailTransporter() {
     port: 587,
     secure: false,
     auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
+      user: stripEnv(process.env.SMTP_USER),
+      pass: stripEnv(process.env.SMTP_PASS),
     },
     connectionTimeout: 10000,
     greetingTimeout: 10000,
@@ -195,7 +240,7 @@ async function sendViaGmail(to, subject, html) {
 
 // ─── 3. Resend HTTP API ───────────────────────────────────────────────────────
 async function sendViaResend(to, subject, html) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = stripEnv(process.env.RESEND_API_KEY);
   if (!apiKey) throw new Error('RESEND_API_KEY not set');
 
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
@@ -255,45 +300,62 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
 
     const attempts = [];
 
-    if (process.env.BREVO_API_KEY) {
-      attempts.push(async () => {
-        console.log(`✉️ Sending via Brevo to ${to}...`);
-        const info = await sendViaBrevo(to, displayName, subject, html);
-        console.log('✅ Brevo email sent:', info.messageId || 'ok');
-        return info;
+    const failures = [];
+
+    if (getBrevoKey()) {
+      attempts.push({
+        name: 'brevo',
+        run: async () => {
+          console.log(`✉️ Sending via Brevo to ${to}...`);
+          const info = await sendViaBrevo(to, displayName, subject, html);
+          console.log('✅ Brevo email sent:', info.messageId || 'ok');
+          return info;
+        },
       });
     }
 
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      attempts.push(async () => {
-        console.log(`✉️ Trying Gmail SMTP to ${to}...`);
-        const info = await sendViaGmail(to, subject, html);
-        console.log('✅ Gmail SMTP sent:', info.messageId);
-        return info;
+    if (stripEnv(process.env.SMTP_USER) && stripEnv(process.env.SMTP_PASS)) {
+      attempts.push({
+        name: 'gmail',
+        run: async () => {
+          console.log(`✉️ Trying Gmail SMTP to ${to}...`);
+          const info = await sendViaGmail(to, subject, html);
+          console.log('✅ Gmail SMTP sent:', info.messageId);
+          return info;
+        },
       });
     }
 
-    if (process.env.RESEND_API_KEY) {
-      attempts.push(async () => {
-        console.log(`✉️ Trying Resend to ${to}...`);
-        const info = await sendViaResend(to, subject, html);
-        console.log('✅ Resend sent:', info.messageId);
-        return info;
+    if (stripEnv(process.env.RESEND_API_KEY)) {
+      attempts.push({
+        name: 'resend',
+        run: async () => {
+          console.log(`✉️ Trying Resend to ${to}...`);
+          const info = await sendViaResend(to, subject, html);
+          console.log('✅ Resend sent:', info.messageId);
+          return info;
+        },
       });
     }
 
     let lastError = 'All email providers failed';
-    for (const attempt of attempts) {
+    for (const { name, run } of attempts) {
       try {
-        const result = await attempt();
-        return { success: true, provider: result.provider, messageId: result.messageId };
+        const result = await run();
+        return {
+          success: true,
+          provider: result.provider,
+          messageId: result.messageId,
+          failures: failures.length ? failures : undefined,
+        };
       } catch (err) {
         lastError = err.message;
-        console.warn('⚠️ Email provider failed:', err.message);
+        failures.push({ provider: name, error: err.message });
+        console.warn(`⚠️ Email provider ${name} failed:`, err.message);
       }
     }
 
-    return { success: false, error: lastError };
+    return { success: false, error: lastError, failures };
   } catch (error) {
     console.error('❌ Error sending email:', error.message);
     return { success: false, error: error.message };
