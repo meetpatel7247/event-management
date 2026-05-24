@@ -320,8 +320,11 @@ const BookingPage = () => {
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                                 Guest Details
                             </h3>
+                            <label htmlFor="booking-name" style={{ display: 'none' }}>Full Name</label>
                             <input
                                 type="text"
+                                id="booking-name"
+                                name="guestName"
                                 placeholder="Full Name"
                                 className="premium-input"
                                 value={guestName}
@@ -329,8 +332,11 @@ const BookingPage = () => {
                                 style={{ marginBottom: '1rem' }}
                                 required
                             />
+                            <label htmlFor="booking-email" style={{ display: 'none' }}>Email Address</label>
                             <input
                                 type="email"
+                                id="booking-email"
+                                name="guestEmail"
                                 placeholder="Email Address for Ticket"
                                 className="premium-input"
                                 value={guestEmail}

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './BookingCard.module.css';
+import { IMAGE_BASE_URL } from '../../utils/api';
 
 const BookingCard = ({ booking, isUrgent = false, isPast = false }) => {
     const navigate = useNavigate();
@@ -13,7 +14,7 @@ const BookingCard = ({ booking, isUrgent = false, isPast = false }) => {
     // Logic to handle both full URLs and local paths (uploads/...)
     let imageSrc = event?.image;
     if (imageSrc && !imageSrc.startsWith('http')) {
-        imageSrc = `http://localhost:5000/${imageSrc}`;
+        imageSrc = `${IMAGE_BASE_URL}/${imageSrc}`;
     }
     
     const finalImageSrc = !imgErrored && imageSrc ? imageSrc : seededFallback;

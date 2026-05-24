@@ -3,6 +3,7 @@ import GlassCard from '../components/GlassCard/GlassCard';
 import styles from './Offers.module.css';
 import { toast } from 'react-toastify';
 import Spinner from '../components/Spinner/Spinner';
+import api from '../utils/api';
 
 /**
  * Offers Page Component
@@ -17,9 +18,8 @@ const Offers = () => {
     useEffect(() => {
         const fetchOffers = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/v1/offers');
-                const data = await response.json();
-                setOffers(data);
+                const response = await api.get('/offers');
+                setOffers(response.data);
             } catch (error) {
                 toast.error('Failed to load special offers.');
             } finally {

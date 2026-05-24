@@ -106,9 +106,7 @@ async function sendViaResend(to, subject, html) {
 // ─── Main entry point ─────────────────────────────────────────────────────────
 async function sendBookingConfirmation(email, name, eventTitle, quantity, bookingId) {
   try {
-    const qrDataUrl = await QRCode.toDataURL(bookingId.toString(), {
-      color: { dark: '#000000', light: '#ffffff' },
-    });
+    const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&margin=10&data=${encodeURIComponent(bookingId.toString())}`;
 
     const subject = `Your Ticket is Booked! - ${eventTitle}`;
     const html = buildEmailHtml(name, eventTitle, quantity, bookingId, qrDataUrl);

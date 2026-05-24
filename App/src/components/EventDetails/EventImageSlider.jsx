@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from './EventImageSlider.module.css';
+import { IMAGE_BASE_URL } from '../../utils/api';
 
 const EventImageSlider = ({ event }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -15,7 +16,7 @@ const EventImageSlider = ({ event }) => {
     const sliderImages = rawImages.length
         ? rawImages.map(img => {
             if (img && typeof img === 'string' && !img.startsWith('http')) {
-                return `http://localhost:5000/${img}`;
+                return `${IMAGE_BASE_URL}/${img}`;
             }
             return img;
         })

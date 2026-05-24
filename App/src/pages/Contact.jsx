@@ -69,9 +69,11 @@ const Contact = () => {
                 ) : (
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Name</label>
+                            <label htmlFor="contact-name" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Name</label>
                             <input 
                                 type="text" 
+                                id="contact-name"
+                                name="name"
                                 style={{
                                     width: '100%',
                                     padding: '12px',
@@ -87,9 +89,11 @@ const Contact = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Email</label>
+                            <label htmlFor="contact-email" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Email</label>
                             <input 
                                 type="email" 
+                                id="contact-email"
+                                name="email"
                                 style={{
                                     width: '100%',
                                     padding: '12px',
@@ -105,8 +109,10 @@ const Contact = () => {
                             />
                         </div>
                         <div className="form-group">
-                            <label style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Message</label>
+                            <label htmlFor="contact-message" style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-muted)' }}>Message</label>
                             <textarea 
+                                id="contact-message"
+                                name="message"
                                 style={{
                                     width: '100%',
                                     padding: '12px',
