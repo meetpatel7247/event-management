@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { eventApi, userApi } from '../utils/api';
 import HeroSlider from '../components/HeroSlider/HeroSlider';
@@ -132,7 +132,146 @@ const Home = ({ searchTerm, searchLocation }) => {
                 </div>
             )}
 
-            {!searchTerm && !searchLocation && !category && view !== 'all' ? (
+            {!loading && events.length === 0 ? (
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    minHeight: '60vh',
+                    padding: '4rem 2rem',
+                    textAlign: 'center',
+                    background: 'rgba(10, 10, 15, 0.6)',
+                    backdropFilter: 'blur(12px)',
+                    border: '1px solid rgba(0, 243, 255, 0.15)',
+                    borderRadius: '24px',
+                    boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37), var(--shadow-card)',
+                    margin: '3rem auto 2rem',
+                    maxWidth: '800px',
+                    position: 'relative',
+                    overflow: 'hidden'
+                }}>
+                    {/* Glowing background shapes for a premium futuristic feel */}
+                    <div style={{
+                        position: 'absolute',
+                        top: '-10%',
+                        left: '-10%',
+                        width: '150px',
+                        height: '150px',
+                        background: 'var(--primary-color)',
+                        filter: 'blur(100px)',
+                        opacity: 0.2,
+                        borderRadius: '50%',
+                        pointerEvents: 'none'
+                    }} />
+                    <div style={{
+                        position: 'absolute',
+                        bottom: '-10%',
+                        right: '-10%',
+                        width: '150px',
+                        height: '150px',
+                        background: 'var(--secondary-color)',
+                        filter: 'blur(100px)',
+                        opacity: 0.2,
+                        borderRadius: '50%',
+                        pointerEvents: 'none'
+                    }} />
+
+                    {/* Animated Neon Icon */}
+                    <div style={{
+                        width: '100px',
+                        height: '100px',
+                        borderRadius: '50%',
+                        background: 'rgba(0, 243, 255, 0.05)',
+                        border: '2px dashed var(--primary-color)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '3.5rem',
+                        marginBottom: '2rem',
+                        boxShadow: '0 0 20px rgba(0, 243, 255, 0.1)',
+                        animation: 'pulseGlow 2.5s infinite ease-in-out',
+                        flexShrink: 0
+                    }}>
+                        📅
+                    </div>
+                    <style>{`
+                        @keyframes pulseGlow {
+                            0% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); border-color: rgba(0, 243, 255, 0.4); }
+                            50% { transform: scale(1.05); box-shadow: 0 0 35px rgba(0, 243, 255, 0.3); border-color: var(--primary-color); }
+                            100% { transform: scale(1); box-shadow: 0 0 20px rgba(0, 243, 255, 0.1); border-color: rgba(0, 243, 255, 0.4); }
+                        }
+                    `}</style>
+
+                    <h2 className="text-gradient" style={{
+                        fontSize: '2.5rem',
+                        fontFamily: "'Orbitron', sans-serif",
+                        fontWeight: '700',
+                        letterSpacing: '2px',
+                        marginBottom: '1rem',
+                        textTransform: 'uppercase'
+                    }}>
+                        No Scheduled Events
+                    </h2>
+
+                    <p style={{
+                        fontSize: '1.2rem',
+                        color: 'var(--text-muted)',
+                        maxWidth: '550px',
+                        lineHeight: '1.6',
+                        margin: '0 auto 2rem',
+                        fontFamily: "'Rajdhani', sans-serif",
+                        letterSpacing: '0.5px'
+                    }}>
+                        There are currently no events active or scheduled on the platform. Please check back later, or start creating events now!
+                    </p>
+
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: '1rem', 
+                        flexWrap: 'wrap', 
+                        justifyContent: 'center',
+                        marginTop: '1rem',
+                        width: '100%',
+                        maxWidth: '450px'
+                    }}>
+                        {user?.role === 'organizer' ? (
+                            <Link to="/organizer" className="premium-button" style={{ 
+                                textDecoration: 'none', 
+                                display: 'inline-block',
+                                textAlign: 'center',
+                                padding: '0.85rem 2rem'
+                            }}>
+                                ➕ Create Event
+                            </Link>
+                        ) : user ? (
+                            <div style={{
+                                padding: '1rem 2rem',
+                                color: 'var(--primary-color)',
+                                border: '1px solid rgba(0, 243, 255, 0.2)',
+                                borderRadius: 'var(--radius)',
+                                background: 'rgba(0, 243, 255, 0.02)',
+                                fontSize: '1rem',
+                                fontFamily: "'Rajdhani', sans-serif",
+                                width: '100%',
+                                textAlign: 'center'
+                            }}>
+                                💡 Sign in as an <strong style={{ textShadow: '0 0 5px var(--primary-color)' }}>Organizer</strong> to create and host your own events!
+                            </div>
+                        ) : (
+                            <Link to="/login" className="premium-button" style={{ 
+                                textDecoration: 'none', 
+                                display: 'inline-block',
+                                textAlign: 'center',
+                                padding: '0.85rem 2rem',
+                                width: '100%'
+                            }}>
+                                🔑 Login / Register
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            ) : !searchTerm && !searchLocation && !category && view !== 'all' ? (
                 <>
                     <HeroSlider />
                     <CategoryRow />
