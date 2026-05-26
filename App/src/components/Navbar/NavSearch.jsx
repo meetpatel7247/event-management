@@ -1,7 +1,60 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { eventApi } from '../../utils/api';
 import styles from './NavSearch.module.css';
 
+const DEFAULT_CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad'];
+
+const extractCity = (locationStr) => {
+    if (!locationStr) return '';
+    const parts = locationStr.split(',').map(p => p.trim()).filter(Boolean);
+    if (parts.length === 0) return '';
+    
+    const last = parts[parts.length - 1];
+    const countries = ['india', 'usa', 'uk', 'canada', 'germany'];
+    
+    if (parts.length > 1 && countries.includes(last.toLowerCase())) {
+        return parts[parts.length - 2];
+    }
+    return last;
+};
+
 const NavSearch = ({ onSearch, onLocationChange }) => {
+    const [cities, setCities] = useState(DEFAULT_CITIES);
+
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const events = await eventApi.getEvents();
+                if (events && events.length > 0) {
+                    // Extract cities and filter unique non-empty ones
+                    const extracted = events
+                        .map(e => extractCity(e.location))
+                        .filter(Boolean);
+                    
+                    // Combine with defaults (case-insensitive deduplication)
+                    const combined = [...DEFAULT_CITIES];
+                    extracted.forEach(city => {
+                        const exists = combined.some(c => c.toLowerCase() === city.toLowerCase());
+                        if (!exists) {
+                            combined.push(city);
+                        }
+                    });
+                    
+                    // Sort alphabetically
+                    combined.sort((a, b) => a.localeCompare(b));
+                    setCities(combined);
+                }
+            } catch (err) {
+                console.error('Failed to fetch dynamic cities:', err);
+            }
+        };
+
+        fetchCities();
+        // Periodically refresh cities list to keep it in sync with new event creation
+        const iv = setInterval(fetchCities, 5000);
+        return () => clearInterval(iv);
+    }, []);
+
     return (
         <div className={styles.searchContainer}>
             <div className={styles.locationWrapper}>
@@ -11,14 +64,9 @@ const NavSearch = ({ onSearch, onLocationChange }) => {
                     defaultValue=""
                 >
                     <option value="">All Cities</option>
-                    <option value="Mumbai">Mumbai</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Bangalore">Bangalore</option>
-                    <option value="Pune">Pune</option>
-                    <option value="Hyderabad">Hyderabad</option>
-                    <option value="Chennai">Chennai</option>
-                    <option value="Kolkata">Kolkata</option>
-                    <option value="Ahmedabad">Ahmedabad</option>
+                    {cities.map((city, idx) => (
+                        <option key={idx} value={city}>{city}</option>
+                    ))}
                 </select>
             </div>
             <div className={styles.searchWrapper}>
