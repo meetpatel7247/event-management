@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { eventApi } from '../../utils/api';
 import styles from './NavSearch.module.css';
 
-const DEFAULT_CITIES = ['Mumbai', 'Delhi', 'Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Kolkata', 'Ahmedabad'];
-
 const extractCity = (locationStr) => {
     if (!locationStr) return '';
     const parts = locationStr.split(',').map(p => p.trim()).filter(Boolean);
@@ -19,7 +17,7 @@ const extractCity = (locationStr) => {
 };
 
 const NavSearch = ({ onSearch, onLocationChange }) => {
-    const [cities, setCities] = useState(DEFAULT_CITIES);
+    const [cities, setCities] = useState([]);
 
     useEffect(() => {
         const fetchCities = async () => {
@@ -31,18 +29,20 @@ const NavSearch = ({ onSearch, onLocationChange }) => {
                         .map(e => extractCity(e.location))
                         .filter(Boolean);
                     
-                    // Combine with defaults (case-insensitive deduplication)
-                    const combined = [...DEFAULT_CITIES];
+                    // Deduplicate (case-insensitive)
+                    const uniqueCities = [];
                     extracted.forEach(city => {
-                        const exists = combined.some(c => c.toLowerCase() === city.toLowerCase());
+                        const exists = uniqueCities.some(c => c.toLowerCase() === city.toLowerCase());
                         if (!exists) {
-                            combined.push(city);
+                            uniqueCities.push(city);
                         }
                     });
                     
                     // Sort alphabetically
-                    combined.sort((a, b) => a.localeCompare(b));
-                    setCities(combined);
+                    uniqueCities.sort((a, b) => a.localeCompare(b));
+                    setCities(uniqueCities);
+                } else {
+                    setCities([]); // Clear cities list if database is empty
                 }
             } catch (err) {
                 console.error('Failed to fetch dynamic cities:', err);
