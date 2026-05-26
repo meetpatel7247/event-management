@@ -379,18 +379,6 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
     const hasBrevoSmtp = !!getBrevoSmtpKey();
     const brevoSetupError = getBrevoHttpKeySetupError();
 
-    if (hasBrevoHttp || hasBrevoSmtp || brevoSetupError) {
-      attempts.push({
-        name: 'brevo',
-        run: async () => {
-          console.log(`✉️ Sending via Brevo to ${to}...`);
-          const info = await sendViaBrevo(to, displayName, subject, html);
-          console.log('✅ Brevo email sent:', info.messageId || 'ok');
-          return info;
-        },
-      });
-    }
-
     // SMTP is blocked on Railway/Render — skip to avoid 10s+ timeouts
     if (!isCloudHost() && stripEnv(process.env.SMTP_USER) && stripEnv(process.env.SMTP_PASS)) {
       attempts.push({
@@ -399,6 +387,18 @@ async function sendBookingConfirmation(email, name, eventTitle, quantity, bookin
           console.log(`✉️ Trying Gmail SMTP to ${to}...`);
           const info = await sendViaGmail(to, subject, html);
           console.log('✅ Gmail SMTP sent:', info.messageId);
+          return info;
+        },
+      });
+    }
+
+    if (hasBrevoHttp || hasBrevoSmtp || brevoSetupError) {
+      attempts.push({
+        name: 'brevo',
+        run: async () => {
+          console.log(`✉️ Sending via Brevo to ${to}...`);
+          const info = await sendViaBrevo(to, displayName, subject, html);
+          console.log('✅ Brevo email sent:', info.messageId || 'ok');
           return info;
         },
       });
