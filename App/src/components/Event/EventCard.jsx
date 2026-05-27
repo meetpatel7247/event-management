@@ -147,7 +147,7 @@ const EventCard = ({ event, isGrid = false }) => {
 
     return (
         <div
-            className={`premium-card ${styles.cardWrapper} ${event.category === 'Festival' ? styles.festivalCard : ''}`}
+            className={`premium-card ${styles.cardWrapper}`}
             data-layout={isGrid ? "grid" : "carousel"}
             onClick={() => navigate(`/event/${event._id}`)}
         >
