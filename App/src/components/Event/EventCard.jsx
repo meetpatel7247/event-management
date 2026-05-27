@@ -163,6 +163,24 @@ const EventCard = ({ event, isGrid = false }) => {
                         setImgErrored(true);
                     }}
                 />
+                {event.isApproved === false && (
+                    <div style={{
+                        position: 'absolute',
+                        top: '12px',
+                        left: '12px',
+                        background: 'rgba(245, 158, 11, 0.9)',
+                        backdropFilter: 'blur(4px)',
+                        color: 'white',
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: '20px',
+                        fontSize: '0.68rem',
+                        fontWeight: 700,
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        zIndex: 2,
+                    }}>
+                        🕒 Pending Approval
+                    </div>
+                )}
                 <div style={{
                     position: 'absolute',
                     top: 0,

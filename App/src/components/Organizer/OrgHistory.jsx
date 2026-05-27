@@ -7,12 +7,13 @@ export default function OrgHistory({ events = [] }) {
   const [filter, setFilter] = useState('All');
 
   const filtered = useMemo(() => {
-    if (filter === 'Approved') return events.filter(e => e.isApproved);
-    if (filter === 'Pending') return events.filter(e => !e.isApproved);
+    if (filter === 'Approved') return events.filter(e => e.isApproved && !e.isRejected);
+    if (filter === 'Pending') return events.filter(e => !e.isApproved && !e.isRejected);
+    if (filter === 'Rejected') return events.filter(e => e.isRejected);
     return events;
   }, [events, filter]);
 
-  const rejectedCount = 0;
+  const rejectedCount = useMemo(() => events.filter(e => e.isRejected).length, [events]);
 
   return (
     <div className="org-panel org-history-panel" style={{ animation: 'orgFadeIn 0.3s ease' }}>
@@ -22,7 +23,7 @@ export default function OrgHistory({ events = [] }) {
           <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.25rem' }}>Track all approved and pending event lifecycle stages</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['All', 'Approved', 'Pending'].map(f => (
+          {['All', 'Approved', 'Pending', 'Rejected'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
