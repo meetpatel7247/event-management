@@ -25,6 +25,7 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
         image: '',
         offerMinTickets: '',
         offerDiscount: '',
+        availableSeats: '100',
     });
 
     // Populate form when editing an existing event.
@@ -46,6 +47,7 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
                 image: initialData.image ?? '',
                 offerMinTickets: initialData.offerMinTickets ?? '',
                 offerDiscount: initialData.offerDiscount ?? '',
+                availableSeats: initialData.availableSeats ?? '100',
             });
         }
     }, [initialData]);
@@ -100,12 +102,15 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
                         onChange={handleChange} required />
                 </div>
 
-                {/* Row 2 – location / normal price */}
-                <div style={{ padding: '1rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                {/* Row 2 – location / normal price / available seats */}
+                <div style={{ padding: '1rem 0', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem' }}>
                     <input className="premium-input" name="location" value={formData.location}
                         placeholder="Location" onChange={handleChange} required />
                     <input className="premium-input" name="price" type="number" min="0"
                         value={formData.price} placeholder="Normal Price (₹)"
+                        onChange={handleChange} required />
+                    <input className="premium-input" name="availableSeats" type="number" min="1"
+                        value={formData.availableSeats} placeholder="Total Seats / Capacity"
                         onChange={handleChange} required />
                 </div>
 
