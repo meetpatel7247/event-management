@@ -8,7 +8,7 @@ async function listEvents(showAll = false) {
 
 /** Returns only events created by this specific organizer */
 async function listEventsByOrganizer(organizerId) {
-  return await EventModel.find({ organizerId, isRejected: { $ne: true } }).populate('organizerId', 'name email');
+  return await EventModel.find({ organizerId }).populate('organizerId', 'name email');
 }
 
 async function findEventById(id) {
