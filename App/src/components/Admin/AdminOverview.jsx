@@ -106,8 +106,14 @@ export default function AdminOverview({
         </button>
 
         <button className="adm-stat-card adm-stat-card--clickable" onClick={() => {
-          const userSplit = [{ label: 'Organizers', count: activeOrgs }, { label: 'Platform Users', count: platformUsers }];
-          openPopup('Active Organizers', activeOrgs, 'Registered organizers', 'category', userSplit, 'count', 'label');
+          const organizersData = organizers.map(org => {
+            const count = events.filter(e => {
+              const orgId = e.organizerId?._id || e.organizerId;
+              return orgId && orgId.toString() === org._id.toString();
+            }).length;
+            return { label: org.name || org.email, count };
+          });
+          openPopup('Active Organizers', activeOrgs, 'Registered organizers event activity', 'category', organizersData, 'count', 'label');
         }}>
           <div className="adm-stat-icon" style={{ background:'rgba(139,92,246,0.15)', color:'#a78bfa' }}>⚡</div>
           <div className="adm-stat-body">
@@ -117,8 +123,14 @@ export default function AdminOverview({
         </button>
 
         <button className="adm-stat-card adm-stat-card--clickable" onClick={() => {
-          const userSplit = [{ label: 'Organizers', count: activeOrgs }, { label: 'Platform Users', count: platformUsers }];
-          openPopup('Platform Users', platformUsers, 'Total registered users', 'category', userSplit, 'count', 'label');
+          const usersData = platformUsersList.map(usr => {
+            const count = bookings.filter(b => {
+              const userId = b.user?._id || b.user;
+              return userId && userId.toString() === usr._id.toString();
+            }).length;
+            return { label: usr.name || usr.email, count };
+          });
+          openPopup('Platform Users', platformUsers, 'Registered users booking activity', 'category', usersData, 'count', 'label');
         }}>
           <div className="adm-stat-icon" style={{ background:'rgba(236,72,153,0.15)', color:'#ec4899' }}>👤</div>
           <div className="adm-stat-body">
