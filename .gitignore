@@ -35,6 +35,9 @@ node_modules/
 # Nested git repositories
 .git
 
-# Backend Specific
 backend/uploads/*
 !backend/uploads/.gitkeep
+
+# gh-pages cache link
+gh-cache/
+
