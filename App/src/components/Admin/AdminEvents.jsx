@@ -112,7 +112,7 @@ export default function AdminEvents({
                       {ev.hasPendingEdits ? (
                         <button className="adm-icon-btn adm-icon-reject" title="Reject Edits" onClick={() => handleRejectEdits(ev._id)}>✕</button>
                       ) : (
-                        !ev.isRejected && (
+                        (!ev.isApproved && !ev.isRejected) && (
                           <button className="adm-icon-btn adm-icon-reject" title="Reject" onClick={() => handleRejectEvent(ev._id)}>✕</button>
                         )
                       )}
