@@ -224,22 +224,22 @@
 }
 
 .festivalCard {
-    border: 1px solid rgba(255, 0, 127, 0.45) !important;
-    box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+    border: 1px solid rgba(0, 243, 255, 0.45) !important;
+    box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
     animation: festivalCardGlow 4s infinite ease-in-out;
 }
 
 @keyframes festivalCardGlow {
     0% {
-        border-color: rgba(255, 0, 127, 0.45) !important;
-        box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+        border-color: rgba(0, 243, 255, 0.45) !important;
+        box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
     }
     50% {
-        border-color: rgba(0, 243, 255, 0.75) !important;
-        box-shadow: 0 0 20px rgba(0, 243, 255, 0.35), 0 0 8px rgba(255, 0, 127, 0.2);
+        border-color: rgba(188, 19, 254, 0.75) !important;
+        box-shadow: 0 0 20px rgba(188, 19, 254, 0.35), 0 0 8px rgba(0, 243, 255, 0.2);
     }
     100% {
-        border-color: rgba(255, 0, 127, 0.45) !important;
-        box-shadow: 0 0 10px rgba(255, 0, 127, 0.15);
+        border-color: rgba(0, 243, 255, 0.45) !important;
+        box-shadow: 0 0 10px rgba(0, 243, 255, 0.15);
     }
 }
