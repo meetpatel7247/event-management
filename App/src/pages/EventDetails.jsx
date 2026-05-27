@@ -54,7 +54,7 @@ const EventDetails = () => {
                 setEvent(mappedEvent);
                 const allData = await eventApi.getEvents();
                 const mappedRelated = allData
-                    .filter(e => e.category === data.category && e._id !== data._id)
+                    .filter(e => e.category === data.category && e._id !== data._id && e.isApproved)
                     .map(e => ({
                         ...e,
                         isLiked: wishlistIds.has(e._id.toString())

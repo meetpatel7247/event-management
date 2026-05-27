@@ -56,8 +56,10 @@ const Home = ({ searchTerm, searchLocation }) => {
                     isLiked: wishlistIds.has(event._id.toString())
                 }));
 
-                setEvents(mappedData);
-                setFilteredEvents(mappedData);
+                const approvedData = mappedData.filter(event => event.isApproved);
+
+                setEvents(approvedData);
+                setFilteredEvents(approvedData);
             } catch (error) {
                 toast.error('Failed to load events from server.');
                 console.error(error);

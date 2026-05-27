@@ -31,17 +31,17 @@ const Wishlist = () => {
             // Fetch all events for the "Top Rated Events" listing
             const allEvents = await eventApi.getEvents();
             
-            // Map wishlisted events to ensure they show up with filled hearts, filtering out any deleted/null events safely
-            const validWishlisted = wishlisted.filter(ev => ev && ev._id);
+            // Map wishlisted events to ensure they show up with filled hearts, filtering out any deleted/null/unapproved events safely
+            const validWishlisted = wishlisted.filter(ev => ev && ev._id && ev.isApproved);
             const wishlistMapped = validWishlisted.map(ev => ({
                 ...ev,
                 isLiked: true
             }));
 
-            // Map all events to verify if they are liked by the current user
+            // Map all events to verify if they are liked by the current user, filtering only approved ones
             const wishlistIds = new Set(validWishlisted.map(e => e._id.toString()));
             const topRatedMapped = allEvents
-                .filter(ev => ev && ev._id)
+                .filter(ev => ev && ev._id && ev.isApproved)
                 .map(ev => ({
                     ...ev,
                     isLiked: wishlistIds.has(ev._id.toString())

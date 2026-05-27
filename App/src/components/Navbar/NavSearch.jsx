@@ -23,9 +23,10 @@ const NavSearch = ({ onSearch, onLocationChange }) => {
         const fetchCities = async () => {
             try {
                 const events = await eventApi.getEvents();
-                if (events && events.length > 0) {
+                const approvedEvents = (events || []).filter(e => e.isApproved);
+                if (approvedEvents.length > 0) {
                     // Extract cities and filter unique non-empty ones
-                    const extracted = events
+                    const extracted = approvedEvents
                         .map(e => extractCity(e.location))
                         .filter(Boolean);
                     
