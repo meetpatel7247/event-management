@@ -2,13 +2,13 @@ const EventModel = require('../models/eventModel');
 const UserModel = require('../models/userModel'); // Ensure User schema is registered for populate
 
 async function listEvents(showAll = false) {
-  const filter = showAll ? {} : { isApproved: true };
+  const filter = showAll ? { isRejected: { $ne: true } } : { isApproved: true };
   return await EventModel.find(filter).populate('organizerId', 'name email');
 }
 
 /** Returns only events created by this specific organizer */
 async function listEventsByOrganizer(organizerId) {
-  return await EventModel.find({ organizerId }).populate('organizerId', 'name email');
+  return await EventModel.find({ organizerId, isRejected: { $ne: true } }).populate('organizerId', 'name email');
 }
 
 async function findEventById(id) {

@@ -148,10 +148,9 @@ const Admin = () => {
 
   /* ── filtered lists ── */
   const filteredEvents = useMemo(() => {
-    let list = events;
-    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved && !e.isRejected);
+    let list = events.filter(e => !e.isRejected);
+    if (eventFilter === 'Pending')  list = list.filter(e => !e.isApproved);
     if (eventFilter === 'Approved') list = list.filter(e => e.isApproved);
-    if (eventFilter === 'Rejected') list = list.filter(e => e.isRejected);
     if (eventSearch) list = list.filter(e => e.title?.toLowerCase().includes(eventSearch.toLowerCase()));
     return list;
   }, [events, eventFilter, eventSearch]);

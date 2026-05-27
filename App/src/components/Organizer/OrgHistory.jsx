@@ -8,22 +8,21 @@ export default function OrgHistory({ events = [], bookings = [], setActiveTab })
 
   const filtered = useMemo(() => {
     if (filter === 'Approved') return events.filter(e => e.isApproved);
-    if (filter === 'Pending') return events.filter(e => !e.isApproved && !e.isRejected);
-    if (filter === 'Rejected') return events.filter(e => e.isRejected);
+    if (filter === 'Pending') return events.filter(e => !e.isApproved);
     return events;
   }, [events, filter]);
 
-  const rejectedCount = useMemo(() => events.filter(e => e.isRejected).length, [events]);
+  const rejectedCount = 0;
 
   return (
     <div className="org-panel org-history-panel" style={{ animation: 'orgFadeIn 0.3s ease' }}>
       <div className="org-myevents-header" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h3 className="org-section-title" style={{ margin: 0 }}>Event Submission History</h3>
-          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.25rem' }}>Track all approved, pending, and rejected event lifecycle stages</p>
+          <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginTop: '0.25rem' }}>Track all approved and pending event lifecycle stages</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {['All', 'Approved', 'Pending', 'Rejected'].map(f => (
+          {['All', 'Approved', 'Pending'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -113,24 +112,7 @@ export default function OrgHistory({ events = [], bookings = [], setActiveTab })
                         >
                           👁 View
                         </button>
-                        {ev.isRejected && (
-                          <button
-                            onClick={() => { setActiveTab('My Events'); }}
-                            style={{
-                              padding: '0.35rem 0.7rem',
-                              borderRadius: '6px',
-                              background: 'rgba(139, 92, 246, 0.15)',
-                              border: '1px solid rgba(139, 92, 246, 0.35)',
-                              color: '#a78bfa',
-                              fontSize: '0.75rem',
-                              fontWeight: 600,
-                              cursor: 'pointer',
-                              transition: 'all 0.2s',
-                            }}
-                          >
-                            ✏️ Edit & Fix
-                          </button>
-                        )}
+                        {/* No rejected action button needed */}
                       </div>
                     </td>
                   </tr>

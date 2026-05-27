@@ -20,7 +20,7 @@ export default function AdminEvents({
               value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
           </div>
           <div className="adm-filter-group" style={{ margin: 0 }}>
-            {['All','Pending','Approved','Rejected'].map(f => (
+            {['All','Pending','Approved'].map(f => (
               <button key={f}
                 className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
                 onClick={() => setEventFilter(f)}>{f}</button>
