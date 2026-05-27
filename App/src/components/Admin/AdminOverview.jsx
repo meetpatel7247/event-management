@@ -5,7 +5,7 @@ import ChartCard from '../charts/ChartCard';
 export default function AdminOverview({
   totalRevenue, revenueGrowth, events, pendingEvents, activeOrgs, platformUsers,
   revenueTrend, categoryData, totalLikes, totalShares, engagementByEvent,
-  handleApprove, handleRejectEvent, setActiveTab,
+  handleApprove, handleRejectEvent,
   users = [],
   bookings = []
 }) {

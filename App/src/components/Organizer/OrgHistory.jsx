@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { statusBadge } from './OrgBadges';
 
-export default function OrgHistory({ events = [], bookings = [], setActiveTab }) {
+export default function OrgHistory({ events = [] }) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState('All');
 
@@ -85,7 +85,6 @@ export default function OrgHistory({ events = [], bookings = [], setActiveTab })
             </thead>
             <tbody>
               {filtered.map(ev => {
-                const isPast = new Date(ev.date) < new Date(new Date().setHours(0,0,0,0));
                 return (
                   <tr key={ev._id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.03)', transition: 'background 0.2s' }} className="org-table-row-hover">
                     <td style={{ padding: '1rem', color: '#f3f4f6', fontWeight: 600 }}>{ev.title}</td>

@@ -114,8 +114,8 @@ const Login = () => {
                         />
                     </div>
 
-                    <button className="premium-button" type="submit">
-                        Sign In
+                    <button className="premium-button" type="submit" disabled={loading}>
+                        {loading ? 'Signing In...' : 'Sign In'}
                     </button>
                 </form>
 

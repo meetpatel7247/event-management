@@ -59,7 +59,7 @@ const MyBookings = () => {
                 past.sort((a, b) => new Date(b.event.date) - new Date(a.event.date));
 
                 setBookings({ urgent, upcoming, past });
-            } catch (error) {
+            } catch {
                 toast.error('Failed to load bookings.');
             } finally {
                 setLoading(false);

@@ -120,10 +120,6 @@ export const adminApi = {
 };
 
 export const userApi = {
-  deleteMe: async () => {
-    const response = await api.delete('/users/me'); // We might need to implement this endpoint
-    return response.data;
-  },
   updateProfile: async (data) => {
     const response = await api.put('/users/profile', data);
     return response.data;

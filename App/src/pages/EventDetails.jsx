@@ -61,7 +61,7 @@ const EventDetails = () => {
                     }));
                 setRelatedEvents(mappedRelated);
             } else toast.error('Event not found');
-        } catch (error) {
+        } catch {
             toast.error('Failed to load event details.');
         } finally {
             setLoading(false);

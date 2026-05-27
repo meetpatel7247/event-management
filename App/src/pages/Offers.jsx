@@ -20,7 +20,7 @@ const Offers = () => {
             try {
                 const response = await api.get('/offers');
                 setOffers(response.data);
-            } catch (error) {
+            } catch {
                 toast.error('Failed to load special offers.');
             } finally {
                 setLoading(false);

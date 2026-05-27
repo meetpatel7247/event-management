@@ -6,11 +6,10 @@ import {
   AttendanceProgressChart,
 } from './OrgCharts';
 import ChartCard from '../charts/ChartCard';
-import { statusBadge } from './OrgBadges';
 
 export default function OrgOverview({
-  events, bookings, totalRevenue, totalTickets, avgAttendance,
-  revenueByEvent, categoryData, setShowForm, setActiveTab
+  events, bookings, totalRevenue, totalTickets,
+  revenueByEvent, categoryData
 }) {
   const [popupData, setPopupData] = useState(null);
   const [selectedEventId, setSelectedEventId] = useState('');
