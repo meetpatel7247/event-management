@@ -1,7 +1,7 @@
 .footer {
     background: #050505;
     border-top: 1px solid var(--border-glass);
-    padding: 4rem 2rem 2rem;
+    padding: 4rem var(--page-gutter) 2rem;
     margin-top: auto;
 }
 

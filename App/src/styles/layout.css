@@ -11,8 +11,8 @@
     margin-left: 0;
     margin-right: 0;
     padding-top: 0;
-    padding-left: 0;
-    padding-right: 0;
+    padding-left: var(--page-gutter);
+    padding-right: var(--page-gutter);
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -26,11 +26,11 @@
 /* Home fills the screen; dashboards keep a readable max width */
 .container.home-page-container .home-root {
     width: 100%;
-    max-width: none;
+    max-width: 100%;
     margin-left: 0;
     margin-right: 0;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 0;
+    padding-right: 0;
     min-width: 0;
     box-sizing: border-box;
 }
@@ -55,11 +55,10 @@
 
 .home-root {
     width: 100%;
-    max-width: none;
+    max-width: 100%;
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 /* Hero edge-to-edge; sections below keep small side inset */
@@ -124,8 +123,8 @@
     }
 
     .container.home-page-container {
-        padding-left: 0;
-        padding-right: 0;
+        padding-left: var(--page-gutter);
+        padding-right: var(--page-gutter);
     }
 
     .container.home-page-container.dashboard-shell {

@@ -2,9 +2,10 @@
     margin: 1rem auto;
     max-width: 100%;
     width: 100%;
-    overflow: hidden;
+    overflow: visible;
     position: relative;
     padding: 0;
+    min-width: 0;
 }
 
 .navBtn {
