@@ -11,10 +11,10 @@ const ListEvent = () => {
             textAlign: 'center',
             padding: '4rem 2rem'
         }}>
-            <h1 style={{ fontSize: '4rem', fontWeight: '900', marginBottom: '1.5rem' }}>
+            <h1 style={{ fontSize: 'clamp(2rem, 8vw, 4rem)', fontWeight: '900', marginBottom: '1.5rem' }}>
                 Join the <span className="text-gradient">Creator Economy</span>
             </h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1.4rem', maxWidth: '850px', marginBottom: '4rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 'clamp(1rem, 2.5vw, 1.4rem)', maxWidth: '850px', marginBottom: '4rem' }}>
                 Whether it's a music festival, a local play, or a corporate conference, DEVIT EVENT provides you with the professional tools you need to reach your audience and sell out fast.
             </p>
 

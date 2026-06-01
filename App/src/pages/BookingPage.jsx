@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { clearBookingDetails, setBookingDetails } from '../store/bookingSlice';
 import { toast } from 'react-toastify';
 import { getUnitPrice, calculateBookingTotal } from '../utils/pricing';
+import styles from './BookingPage.module.css';
 
 /**
  * BookingPage Component
@@ -142,17 +143,8 @@ const BookingPage = () => {
     const selectedConfig = TICKET_TYPES.find((t) => t.id === ticketType);
 
     return (
-        <div
-            className="container"
-            style={{
-                paddingTop: '4rem',
-                paddingBottom: '4rem',
-                minHeight: '80vh',
-                display: 'flex',
-                justifyContent: 'center',
-            }}
-        >
-            <div className="premium-card" style={{ maxWidth: '640px', width: '100%' }}>
+        <div className={`container ${styles.page}`}>
+            <div className={`premium-card ${styles.card}`}>
                 {bookingSuccess ? (
                     <div style={{ textAlign: 'center' }}>
                         <h2 style={{ fontSize: '2rem', marginBottom: '1rem', color: '#10b981' }}>🎉 Ticket Booked!</h2>
@@ -192,7 +184,7 @@ const BookingPage = () => {
                     </div>
                 ) : (
                     <>
-                        <h2 style={{ fontSize: '2rem', marginBottom: '2rem', textAlign: 'center' }}>
+                        <h2 className={styles.pageTitle}>
                             Confirm Booking & Payment
                         </h2>
 
@@ -212,13 +204,15 @@ const BookingPage = () => {
                             <h3 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '1rem', letterSpacing: '0.05em', textTransform: 'uppercase', color: 'var(--text-muted)' }}>
                                 Select Ticket Type
                             </h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                            <div className={styles.ticketGrid}>
                                 {TICKET_TYPES.map((t) => {
                                     const tPrice = getUnitPrice(bookingEvent, t.id);
                                     const isSelected = ticketType === t.id;
                                     return (
                                         <button
                                             key={t.id}
+                                            type="button"
+                                            className={styles.ticketBtn}
                                             onClick={() => handleTypeSelect(t.id)}
                                             style={{
                                                 position: 'relative',
@@ -361,17 +355,17 @@ const BookingPage = () => {
                         </div>
 
                         {/* Actions */}
-                        <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem' }}>
+                        <div className={styles.actionRow}>
                             <button
+                                type="button"
                                 className="premium-button premium-button-outline"
-                                style={{ flex: 1 }}
                                 onClick={() => navigate(-1)}
                             >
                                 Back
                             </button>
                             <button
+                                type="button"
                                 className="premium-button"
-                                style={{ flex: 1 }}
                                 onClick={handleConfirmBooking}
                                 disabled={loading}
                             >

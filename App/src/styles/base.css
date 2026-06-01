@@ -9,6 +9,13 @@ html, body {
     overflow-x: hidden;
 }
 
+img,
+video,
+svg {
+    max-width: 100%;
+    height: auto;
+}
+
 body {
     background-color: var(--bg-dark);
     color: var(--text-main);

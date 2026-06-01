@@ -1,0 +1,67 @@
+.page {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.card {
+    max-width: 640px;
+    width: 100%;
+}
+
+.pageTitle {
+    font-size: clamp(1.35rem, 4vw, 2rem);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.ticketGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.ticketBtn {
+    position: relative;
+    border-radius: 12px;
+    padding: 1rem 0.75rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s ease;
+    min-width: 0;
+}
+
+.actionRow {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.actionRow button {
+    flex: 1;
+    min-width: 0;
+}
+
+@media (max-width: 640px) {
+    .page {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+
+    .ticketGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actionRow {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 1rem;
+    }
+}

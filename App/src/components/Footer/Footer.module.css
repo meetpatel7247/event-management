@@ -93,3 +93,22 @@
     color: var(--text-muted);
     font-size: 0.8rem;
 }
+
+@media (max-width: 768px) {
+    .footer {
+        padding-top: 2.5rem;
+    }
+
+    .container {
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .linksColumn {
+        flex: 1 1 100%;
+    }
+
+    .brandColumn {
+        min-width: 0;
+    }
+}
