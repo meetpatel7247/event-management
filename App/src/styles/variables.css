@@ -32,8 +32,12 @@
     --card-height: 440px;
     --card-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
-    /* Layout */
+    /* Layout — shared horizontal gutters (home, admin, organizer) */
     --max-width: 100%;
+    --page-gutter: 1rem;
+    --content-max: 1320px;
+    --dashboard-max: var(--content-max);
+    --dashboard-gutter: var(--page-gutter);
     --nav-height: 80px;
     --radius: 8px;
 }

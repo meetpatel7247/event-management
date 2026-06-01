@@ -166,7 +166,8 @@ function App() {
   const isEventDetailsPage = location.pathname.startsWith('/event/');
   const isAdminPage = location.pathname.startsWith('/admin');
   const isOrganizerPage = location.pathname.startsWith('/organizer');
-  const useCompactPadding = isHomePage || isEventDetailsPage || isAdminPage || isOrganizerPage;
+  const isDashboardPage = isAdminPage || isOrganizerPage;
+  const useCompactPadding = isHomePage || isEventDetailsPage || isDashboardPage;
 
   if (isDuplicate) {
     return (
@@ -334,7 +335,10 @@ function App() {
       <Navbar onSearch={setSearchTerm} onLocationChange={setSearchLocation} />
 
       {/* Main content view that changes per route */}
-      <main className={`container ${useCompactPadding ? 'home-page-container' : ''}`} style={{ paddingBottom: isHomePage ? '0' : '4rem', flex: 1 }}>
+      <main
+        className={`container ${useCompactPadding ? 'home-page-container' : ''} ${isDashboardPage ? 'dashboard-shell' : ''}`}
+        style={{ paddingBottom: isHomePage ? '0' : isDashboardPage ? undefined : '4rem', flex: 1 }}
+      >
         <AppRoutes searchTerm={searchTerm} searchLocation={searchLocation} />
       </main>
 

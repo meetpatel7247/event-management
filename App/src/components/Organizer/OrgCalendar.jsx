@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function OrgCalendar({ events, bookings }) {
   return (
-    <div className="org-panel">
+    <div className="org-panel org-panel--content">
       <h3 className="org-section-title">Event Calendar</h3>
       {events.length === 0 ? (
         <div className="org-empty">No events to display.</div>

@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { clearBookingDetails, setBookingDetails } from '../store/bookingSlice';
 import { toast } from 'react-toastify';
+import { getUnitPrice, calculateBookingTotal } from '../utils/pricing';
 
 /**
  * BookingPage Component
@@ -73,22 +74,13 @@ const BookingPage = () => {
         }
     }, [bookingEvent, bookingSuccess, navigate]);
 
-    /** Returns the unit price for the given ticket tier */
-    const getPriceForType = (type) => {
-        if (!bookingEvent) return 0;
-        if (type === 'VIP') return bookingEvent.price + 300;
-        if (type === 'VVIP') return bookingEvent.price + 600;
-        return bookingEvent.price;
-    };
-
     /** Recalculate totals whenever quantity or ticket type changes */
     const recalculate = (newQty, newType) => {
-        const unitPrice = getPriceForType(newType);
-        let discount = 0;
-        if (newQty >= 3) {
-            discount = (unitPrice * newQty * 20) / 100;
-        }
-        const newTotal = unitPrice * newQty - discount;
+        const { totalPrice: newTotal, discountAmount: discount } = calculateBookingTotal(
+            bookingEvent,
+            newQty,
+            newType
+        );
         dispatch(setBookingDetails({
             event: bookingEvent,
             quantity: newQty,
@@ -146,7 +138,7 @@ const BookingPage = () => {
 
     if (!bookingEvent) return null;
 
-    const unitPrice = getPriceForType(ticketType);
+    const unitPrice = getUnitPrice(bookingEvent, ticketType);
     const selectedConfig = TICKET_TYPES.find((t) => t.id === ticketType);
 
     return (
@@ -222,7 +214,7 @@ const BookingPage = () => {
                             </h3>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
                                 {TICKET_TYPES.map((t) => {
-                                    const tPrice = getPriceForType(t.id);
+                                    const tPrice = getUnitPrice(bookingEvent, t.id);
                                     const isSelected = ticketType === t.id;
                                     return (
                                         <button
@@ -321,7 +313,12 @@ const BookingPage = () => {
                             </div>
                             {discountAmount > 0 && (
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', color: '#4ade80' }}>
-                                    <span>Group Discount (20%)</span>
+                                    <span>
+                                        Offer discount
+                                        {bookingEvent.offerMinTickets > 0 && bookingEvent.offerDiscount > 0
+                                            ? ` (${bookingEvent.offerDiscount}% on ${bookingEvent.offerMinTickets}+ tickets)`
+                                            : ''}
+                                    </span>
                                     <span>-₹{discountAmount.toFixed(2)}</span>
                                 </div>
                             )}

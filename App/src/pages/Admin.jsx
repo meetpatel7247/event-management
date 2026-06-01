@@ -50,17 +50,10 @@ const Admin = () => {
   }, []);
 
   /* ── derived stats ── */
-  const totalRevenue    = useMemo(() => {
-    return bookings.reduce((s, b) => {
-      const ev = events.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
-      if (!ev) return s + (b.totalPrice || 0);
-      const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
-      const subtotal = unitPrice * b.quantity;
-      const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
-      const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
-      return s + (subtotal - savings);
-    }, 0);
-  }, [bookings, events]);
+  const totalRevenue = useMemo(
+    () => bookings.reduce((s, b) => s + (b.totalPrice || 0), 0),
+    [bookings]
+  );
   const pendingEvents   = useMemo(() => events.filter(e => (!e.isApproved && !e.isRejected) || e.hasPendingEdits), [events]);
   const activeOrgs      = useMemo(() => users.filter(u => u.role === 'organizer' && u.isApproved !== false).length, [users]);
   const platformUsers   = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
@@ -74,17 +67,7 @@ const Admin = () => {
       const d = new Date(b.createdAt || b.bookingDate || Date.now());
       const key = d.toLocaleString('en', { month: 'short' });
       
-      const ev = events.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
-      const paid = (() => {
-        if (!ev) return b.totalPrice || 0;
-        const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
-        const subtotal = unitPrice * b.quantity;
-        const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
-        const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
-        return subtotal - savings;
-      })();
-      
-      map[key] = (map[key] || 0) + paid;
+      map[key] = (map[key] || 0) + (b.totalPrice || 0);
     });
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const present = months.filter(m => map[m]);

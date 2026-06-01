@@ -35,7 +35,7 @@ export default function OrgAnalytics({ events, ticketsByEvent, bestEvent, mostPo
   }, [events]);
 
   return (
-    <div className="org-panel">
+    <div className="org-panel org-panel--content">
       {popupOpen && ticketsByEvent?.length > 0 && (
         <div className="org-modal-overlay" onClick={() => setPopupOpen(false)}>
           <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}>
@@ -254,7 +254,7 @@ export default function OrgAnalytics({ events, ticketsByEvent, bestEvent, mostPo
           >
             <TicketSparkChart data={ticketsByEvent} valueKey="tickets" labelKey="label" chartHeight={220} />
           </ChartCard>
-          <div className="org-stats-grid" style={{ gridTemplateColumns: 'repeat(3,1fr)', marginTop: '2rem' }}>
+          <div className="org-stats-grid org-stats-grid--three">
             <button className="org-stat-card org-stat-card--clickable" onClick={() => setActiveModal('bestEvent')} style={{ color: 'inherit', fontFamily: 'inherit', textAlign: 'left' }}>
               <div className="org-stat-icon" style={{ background: 'rgba(99,102,241,0.15)', color: '#6366f1' }}>🏆</div>
               <div>

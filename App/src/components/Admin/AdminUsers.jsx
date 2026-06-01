@@ -6,7 +6,7 @@ export default function AdminUsers({
   events, handleDeleteUser
 }) {
   return (
-    <div className="adm-panel">
+    <div className="adm-panel adm-panel--table">
       <div className="adm-search-bar">
         <div className="adm-search-input-wrap">
           <span className="adm-search-icon">🔍</span>
@@ -23,7 +23,7 @@ export default function AdminUsers({
       </div>
 
       <div className="adm-table-wrap">
-        <table className="adm-table">
+        <table className="adm-table adm-table--standard">
           <thead>
             <tr>
               <th>NAME</th>

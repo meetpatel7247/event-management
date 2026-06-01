@@ -9,7 +9,7 @@ export default function OrgMyEvents({
 }) {
   const navigate = useNavigate();
   return (
-    <div className="org-panel">
+    <div className="org-panel org-panel--content">
       {showForm ? (
         <div className="org-form-wrap">
           <h3 className="org-section-title">{editingEvent ? 'Edit Event' : 'Create New Event'}</h3>

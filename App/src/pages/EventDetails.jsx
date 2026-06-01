@@ -12,6 +12,7 @@ import EventImageSlider from '../components/EventDetails/EventImageSlider';
 import BookingPanel from '../components/EventDetails/BookingPanel';
 import RelatedEvents from '../components/EventDetails/RelatedEvents';
 import Spinner from '../components/Spinner/Spinner';
+import { calculateBookingTotal } from '../utils/pricing';
 
 /**
  * EventDetails Component
@@ -79,12 +80,8 @@ const EventDetails = () => {
 
     useEffect(() => {
         if (event) {
-            const minTickets = event.offerMinTickets || 0;
-            const discountPercent = event.offerDiscount || 0;
-            const discount = (minTickets > 0 && discountPercent > 0 && quantity >= minTickets) 
-                ? (event.price * quantity * discountPercent) / 100 
-                : 0;
-            setDiscountInfo({ discountAmount: discount, totalPrice: (event.price * quantity) - discount });
+            const { totalPrice, discountAmount } = calculateBookingTotal(event, quantity, 'Normal');
+            setDiscountInfo({ discountAmount, totalPrice });
         }
     }, [quantity, event]);
 

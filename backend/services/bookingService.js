@@ -1,6 +1,36 @@
 const BookingModel = require('../models/bookingModel');
 const EventModel = require('../models/eventModel');
 const UserModel = require('../models/userModel'); // Ensure User schema is registered for populate
+const { calculateBookingTotal } = require('../utils/bookingPricing');
+
+async function reconcileBookingPrice(booking, event) {
+  if (!booking || !event) return booking;
+
+  const { totalPrice: correctTotal } = calculateBookingTotal(
+    event,
+    booking.quantity,
+    booking.ticketType
+  );
+
+  if (Math.abs((booking.totalPrice || 0) - correctTotal) > 0.01) {
+    booking.totalPrice = correctTotal;
+    await booking.save();
+  }
+
+  return booking;
+}
+
+async function reconcileBookingsList(bookings) {
+  await Promise.all(
+    bookings.map(async (b) => {
+      const event = b.event;
+      if (event && event._id) {
+        await reconcileBookingPrice(b, event);
+      }
+    })
+  );
+  return bookings;
+}
 
 async function createBooking({ userId, eventId, quantity, totalPrice, ticketType }) {
   const event = await EventModel.findById(eventId);
@@ -32,12 +62,15 @@ async function createBooking({ userId, eventId, quantity, totalPrice, ticketType
     throw err;
   }
 
+  const type = ticketType || 'Normal';
+  const { totalPrice: chargedTotal } = calculateBookingTotal(event, quantity, type);
+
   const booking = await BookingModel.create({
     user: userId,
     event: eventId,
     quantity,
-    totalPrice,
-    ticketType: ticketType || 'Normal',
+    totalPrice: chargedTotal,
+    ticketType: type,
   });
 
   // Atomically decrement seats so we avoid full document validation
@@ -58,11 +91,13 @@ async function createBooking({ userId, eventId, quantity, totalPrice, ticketType
 }
 
 async function listUserBookings(userId) {
-  return await BookingModel.find({ user: userId }).populate('event');
+  const bookings = await BookingModel.find({ user: userId }).populate('event');
+  return reconcileBookingsList(bookings);
 }
 
 async function listAllBookings() {
-  return await BookingModel.find().populate(['user', 'event']);
+  const bookings = await BookingModel.find().populate(['user', 'event']);
+  return reconcileBookingsList(bookings);
 }
 
 /** Returns bookings only for events owned by this organizer or general seeded events (available to all) */
@@ -76,7 +111,8 @@ async function listBookingsByOrganizer(organizerId) {
     ]
   }).select('_id');
   const eventIds = events.map(e => e._id);
-  return await BookingModel.find({ event: { $in: eventIds } }).populate(['user', 'event']);
+  const bookings = await BookingModel.find({ event: { $in: eventIds } }).populate(['user', 'event']);
+  return reconcileBookingsList(bookings);
 }
 
 module.exports = {

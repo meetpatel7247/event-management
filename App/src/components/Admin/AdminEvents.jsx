@@ -11,26 +11,24 @@ export default function AdminEvents({
   const navigate = useNavigate();
 
   return (
-    <div className="adm-panel">
-      <div className="adm-search-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '300px', flexWrap: 'wrap' }}>
-          <div className="adm-search-input-wrap" style={{ flex: 1 }}>
-            <span className="adm-search-icon">🔍</span>
-            <input className="adm-search-input" placeholder="Search events…"
-              value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
-          </div>
-          <div className="adm-filter-group" style={{ margin: 0 }}>
-            {['All','Pending','Approved'].map(f => (
-              <button key={f}
-                className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
-                onClick={() => setEventFilter(f)}>{f}</button>
-            ))}
-          </div>
+    <div className="adm-panel adm-panel--table">
+      <div className="adm-search-bar">
+        <div className="adm-search-input-wrap">
+          <span className="adm-search-icon">🔍</span>
+          <input className="adm-search-input" placeholder="Search events…"
+            value={eventSearch} onChange={e => setEventSearch(e.target.value)} />
+        </div>
+        <div className="adm-filter-group">
+          {['All','Pending','Approved'].map(f => (
+            <button key={f}
+              className={`adm-filter-btn ${eventFilter === f ? 'adm-filter-active' : ''}`}
+              onClick={() => setEventFilter(f)}>{f}</button>
+          ))}
         </div>
       </div>
 
       <div className="adm-table-wrap">
-        <table className="adm-table">
+        <table className="adm-table adm-table--wide">
           <thead>
             <tr>
               <th>EVENT</th>

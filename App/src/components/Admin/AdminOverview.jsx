@@ -33,15 +33,7 @@ export default function AdminOverview({
     return userId ? userId.toString() : '';
   }).filter(Boolean)).size;
   
-  const orgRevenue = orgBookings.reduce((sum, b) => {
-    const ev = orgEvents.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
-    if (!ev) return sum + (b.totalPrice || 0);
-    const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
-    const subtotal = unitPrice * b.quantity;
-    const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
-    const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
-    return sum + (subtotal - savings);
-  }, 0);
+  const orgRevenue = orgBookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
 
   const selectedUser = platformUsersList.find(usr => usr._id === selectedUserId);
   const userBookings = selectedUser ? bookings.filter(b => {
@@ -296,10 +288,10 @@ export default function AdminOverview({
 
 
       {/* ── Organizer & User Analytics ── */}
-      <div className="adm-section" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', gap: '2rem', marginTop: '2.5rem' }}>
+      <div className="adm-section adm-analytics-grid">
         
         {/* Organizer Directory Component */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="adm-analytics-card">
           <div style={{ display: 'flex', justifySpace: 'between', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>🏢 Organizer Directory</span>
@@ -372,13 +364,7 @@ export default function AdminOverview({
                           {orgEvents.map(e => {
                             const evRevenue = bookings
                               .filter(b => b.event && (b.event._id || b.event).toString() === e._id.toString())
-                              .reduce((sum, b) => {
-                                const unitPrice = b.ticketType === 'VVIP' ? (e.vvipPrice || 0) : b.ticketType === 'VIP' ? (e.vipPrice || 0) : (e.price || 0);
-                                const subtotal = unitPrice * b.quantity;
-                                const hasDiscount = e.offerDiscount > 0 && e.offerMinTickets > 0 && b.quantity >= e.offerMinTickets;
-                                const savings = hasDiscount ? (subtotal * e.offerDiscount) / 100 : 0;
-                                return sum + (subtotal - savings);
-                              }, 0);
+                              .reduce((sum, b) => sum + (b.totalPrice || 0), 0);
                             const evSold = bookings
                               .filter(b => b.event && (b.event._id || b.event).toString() === e._id.toString())
                               .reduce((sum, b) => sum + (b.quantity || 0), 0);
@@ -417,7 +403,7 @@ export default function AdminOverview({
         </div>
 
         {/* User Insights Component */}
-        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+        <div className="adm-analytics-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span>👥 User Insights</span>

@@ -289,7 +289,13 @@ export function RevenueHorizontalChart({ data, valueKey, labelKey, chartHeight =
 }
 
 /** Organizer: wedge pie — category split */
-export function CategoryPieChart({ data, valueKey = 'value', labelKey = 'name' }) {
+export function CategoryPieChart({
+  data,
+  valueKey = 'value',
+  labelKey = 'name',
+  chartHeight = 200,
+  pieSize = 140,
+}) {
   const [active, setActive] = useState(null);
   const total = data.reduce((s, d) => s + (d[valueKey] ?? d.value ?? 0), 0) || 1;
   let cumulative = 0;
@@ -313,9 +319,13 @@ export function CategoryPieChart({ data, valueKey = 'value', labelKey = 'name' }
   const activeSlice = active != null ? slices[active] : null;
 
   return (
-    <div className="dash-pie-chart" style={{ '--dash-h': '200px' }} onClick={e => e.stopPropagation()}>
+    <div
+      className="dash-pie-chart"
+      style={{ '--dash-h': `${chartHeight}px`, '--dash-pie-size': `${pieSize}px` }}
+      onClick={e => e.stopPropagation()}
+    >
       <div className="dash-pie-svg-wrap">
-        <svg viewBox="0 0 100 100" className="dash-pie-svg">
+        <svg viewBox="0 0 100 100" className="dash-pie-svg" width={pieSize} height={pieSize}>
           {slices.map((s, i) => (
             <path
               key={i}

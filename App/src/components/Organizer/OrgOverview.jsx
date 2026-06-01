@@ -6,6 +6,7 @@ import {
   AttendanceProgressChart,
 } from './OrgCharts';
 import ChartCard from '../charts/ChartCard';
+import { calculateBookingTotal } from '../../utils/pricing';
 
 export default function OrgOverview({
   events, bookings, totalRevenue, totalTickets,
@@ -17,15 +18,27 @@ export default function OrgOverview({
   const [showUsersModal, setShowUsersModal] = useState(false);
 
   // All unique users who booked any of this organizer's events
-  const bookedUserRows = bookings.map(b => ({
-    userId: b.user?._id || b.userId || '—',
-    name: b.user?.name || 'Guest',
-    email: b.user?.email || '',
-    event: b.event?.title || '—',
-    ticketType: b.ticketType || 'Normal',
-    quantity: b.quantity || 0,
-    totalPaid: b.totalPrice || 0,
-  }));
+  const bookedUserRows = bookings.map(b => {
+    const eventDoc = b.event?._id ? b.event : events.find(e => e._id === (b.event?._id || b.event));
+    const pricing = eventDoc
+      ? calculateBookingTotal(eventDoc, b.quantity, b.ticketType)
+      : null;
+    return {
+      bookingId: b._id,
+      userId: b.user?._id || b.userId || '—',
+      name: b.user?.name || 'Guest',
+      email: b.user?.email || '',
+      event: b.event?.title || '—',
+      ticketType: b.ticketType || 'Normal',
+      quantity: b.quantity || 0,
+      unitPrice: pricing?.unitPrice ?? null,
+      discountAmount: pricing?.discountAmount ?? 0,
+      offerDiscount: eventDoc?.offerDiscount ?? 0,
+      offerMinTickets: eventDoc?.offerMinTickets ?? 0,
+      calculatedPaid: pricing?.totalPrice ?? (b.totalPrice || 0),
+      totalPaid: b.totalPrice || 0,
+    };
+  });
   const uniqueUsersCount = new Set(bookings.map(b => (b.user?._id || b.userId || '').toString()).filter(Boolean)).size;
 
   const selectedEvent = events.find(e => e._id === selectedEventId);
@@ -44,7 +57,7 @@ export default function OrgOverview({
       return <div className="dash-chart-empty">No data to display</div>;
     }
     const { chartType, chartData } = popupData;
-    const h = 240;
+    const h = 300;
     switch (chartType) {
       case 'revenue':
         return <RevenueHorizontalChart data={chartData} valueKey="value" labelKey="label" chartHeight={h} />;
@@ -53,80 +66,129 @@ export default function OrgOverview({
       case 'attendance':
         return <AttendanceProgressChart data={chartData} valueKey="value" labelKey="label" chartHeight={h} />;
       case 'category':
-        return <CategoryPieChart data={chartData} />;
+        return <CategoryPieChart data={chartData} chartHeight={280} pieSize={240} />;
       default:
         return <div className="dash-chart-empty">No data to display</div>;
     }
   };
 
   return (
-    <div className="org-panel">
+    <div className="org-panel org-panel--content">
       {/* ── Users Booked Modal ── */}
       {showUsersModal && (
         <div className="org-modal-overlay" onClick={() => setShowUsersModal(false)}>
-          <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}
-            style={{ width: '90%', maxWidth: '820px', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div
+            className="org-modal-content org-modal-content--stat"
+            onClick={e => e.stopPropagation()}
+          >
             <button className="org-modal-close" onClick={() => setShowUsersModal(false)}>✕</button>
             <h3 className="org-modal-title">👥 Users Who Booked Your Events</h3>
-            <div style={{ marginBottom: '1rem', display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: '#64748b' }}>
+            <div className="org-modal-body--stat">
+            <div style={{ marginBottom: '1rem', display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: '#64748b', flexShrink: 0 }}>
               <span>Total bookings: <strong style={{ color: '#f3f4f6' }}>{bookedUserRows.length}</strong></span>
               <span>Unique users: <strong style={{ color: '#a78bfa' }}>{uniqueUsersCount}</strong></span>
             </div>
+            <div className="org-modal-scroll-body">
             {bookedUserRows.length === 0 ? (
               <div style={{ padding: '2.5rem', textAlign: 'center', color: '#475569', fontStyle: 'italic' }}>No bookings yet across your events.</div>
             ) : (
-              <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.83rem' }}>
+              <div className="org-bookings-table-wrap">
+                <table className="org-bookings-table">
+                  <colgroup>
+                    <col className="col-user" />
+                    <col className="col-id" />
+                    <col className="col-event" />
+                    <col className="col-type" />
+                    <col className="col-qty" />
+                    <col className="col-unit" />
+                    <col className="col-discount" />
+                    <col className="col-paid" />
+                  </colgroup>
                   <thead>
-                    <tr style={{ background: 'rgba(255,255,255,0.04)', borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User</th>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User ID</th>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'left', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Event</th>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'center', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Ticket Type</th>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'center', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Qty</th>
-                      <th style={{ padding: '0.7rem 1rem', color: '#64748b', textAlign: 'right', fontSize: '0.7rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Paid</th>
+                    <tr>
+                      <th style={{ textAlign: 'left' }}>User</th>
+                      <th style={{ textAlign: 'left' }}>User ID</th>
+                      <th style={{ textAlign: 'left' }}>Event</th>
+                      <th style={{ textAlign: 'center' }}>Ticket Type</th>
+                      <th style={{ textAlign: 'center' }}>Qty</th>
+                      <th style={{ textAlign: 'right' }}>Per ticket</th>
+                      <th style={{ textAlign: 'center' }}>Discount</th>
+                      <th style={{ textAlign: 'right' }}>Paid</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {bookedUserRows.map((row, i) => (
-                      <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                        <td style={{ padding: '0.75rem 1rem' }}>
-                          <div style={{ fontWeight: 600, color: '#e2e8f0' }}>{row.name}</div>
-                          <div style={{ fontSize: '0.7rem', color: '#64748b' }}>{row.email}</div>
+                    {bookedUserRows.map((row, i) => {
+                      const ticketClass =
+                        row.ticketType === 'VVIP'
+                          ? 'org-ticket-badge--vvip'
+                          : row.ticketType === 'VIP'
+                            ? 'org-ticket-badge--vip'
+                            : 'org-ticket-badge--normal';
+                      return (
+                      <tr key={row.bookingId || i}>
+                        <td>
+                          <div style={{ fontWeight: 600, color: '#e2e8f0' }} className="org-bookings-cell-ellipsis" title={row.name}>{row.name}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#64748b' }} className="org-bookings-cell-ellipsis" title={row.email}>{row.email}</div>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#475569', fontFamily: 'monospace', fontSize: '0.72rem' }}>
+                        <td style={{ color: '#475569', fontFamily: 'monospace', fontSize: '0.72rem', textAlign: 'left' }}>
                           {String(row.userId).slice(-8)}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', color: '#94a3b8', maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <td style={{ color: '#94a3b8' }} className="org-bookings-cell-ellipsis" title={row.event}>
                           {row.event}
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
-                          <span style={{
-                            padding: '0.2rem 0.6rem', borderRadius: '6px', fontSize: '0.65rem', fontWeight: 700,
-                            background: row.ticketType === 'VVIP' ? 'rgba(236,72,153,0.18)' : row.ticketType === 'VIP' ? 'rgba(139,92,246,0.18)' : 'rgba(56,189,248,0.12)',
-                            color: row.ticketType === 'VVIP' ? '#ec4899' : row.ticketType === 'VIP' ? '#a78bfa' : '#38bdf8',
-                          }}>{row.ticketType}</span>
+                        <td style={{ textAlign: 'center' }}>
+                          <span className={`org-ticket-badge ${ticketClass}`}>{row.ticketType}</span>
                         </td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'center', color: '#e2e8f0', fontWeight: 700 }}>{row.quantity}</td>
-                        <td style={{ padding: '0.75rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>₹{row.totalPaid.toLocaleString()}</td>
+                        <td style={{ textAlign: 'center', color: '#e2e8f0', fontWeight: 700 }}>{row.quantity}</td>
+                        <td style={{ textAlign: 'right', color: '#94a3b8', whiteSpace: 'nowrap' }}>
+                          {row.unitPrice != null ? `₹${row.unitPrice.toLocaleString()}` : '—'}
+                        </td>
+                        <td>
+                          <div className="org-bookings-discount-slot">
+                            {row.discountAmount > 0 ? (
+                              <button
+                                type="button"
+                                className="org-bookings-discount-btn"
+                                onClick={() => setDiscountCalc({
+                                  title: row.event,
+                                  price: row.unitPrice,
+                                  discount: row.offerDiscount,
+                                  minTickets: row.offerMinTickets,
+                                  actualQty: row.quantity,
+                                  savings: row.discountAmount,
+                                  paid: row.totalPaid ?? row.calculatedPaid,
+                                })}
+                                title="Click to view booking calculation"
+                              >
+                                🎁 {row.offerDiscount}%
+                              </button>
+                            ) : (
+                              <span className="org-bookings-discount-empty">—</span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ textAlign: 'right', color: '#10b981', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                          ₹{row.totalPaid.toLocaleString()}
+                        </td>
                       </tr>
-                    ))}
+                    );})}
                   </tbody>
                 </table>
               </div>
             )}
+            </div>
+            </div>
           </div>
         </div>
       )}
 
       {popupData && (
         <div className="org-modal-overlay" onClick={closePopup}>
-          <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}
-            style={{ width: '90%', maxWidth: '820px', maxHeight: '80vh', overflowY: 'auto' }}>
+          <div className="org-modal-content org-modal-content--stat" onClick={e => e.stopPropagation()}>
             <button className="org-modal-close" onClick={closePopup}>✕</button>
             <h3 className="org-modal-title">{popupData.title}</h3>
-            <div className="org-modal-body">
-              <div className="org-modal-stat">
+            <div className="org-modal-body--stat">
+              <div className="org-modal-stat org-modal-stat--popup">
                  <div className="org-modal-value">{popupData.value}</div>
                  <div className="org-modal-sub">{popupData.sub}</div>
               </div>
@@ -267,7 +329,7 @@ export default function OrgOverview({
 
 
       {/* ── Event Analyzer Dropdown ── */}
-      <div className="org-section" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '1.5rem', marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+      <div className="org-section org-detail-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700, color: '#f3f4f6', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <span>📈 Event Analyzer & Attendees</span>
@@ -305,7 +367,7 @@ export default function OrgOverview({
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'admFadeIn 0.3s ease' }}>
             
             {/* Stats Overview */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            <div className="org-metrics-grid">
               {/* Ticket Sales */}
               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.04)' }}>
                 <div style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', marginBottom: '0.3rem', fontWeight: 600 }}>Tickets Sold</div>
@@ -365,12 +427,10 @@ export default function OrgOverview({
                     </thead>
                     <tbody>
                       {eventBookings.map(b => {
-                        const unitPrice = b.ticketType === 'VVIP' ? (selectedEvent.vvipPrice || 0) : b.ticketType === 'VIP' ? (selectedEvent.vipPrice || 0) : (selectedEvent.price || 0);
-                        const subtotal = unitPrice * b.quantity;
-                        const hasDiscount = selectedEvent.offerDiscount > 0 && selectedEvent.offerMinTickets > 0 && b.quantity >= selectedEvent.offerMinTickets;
-                        const savings = hasDiscount ? (subtotal * selectedEvent.offerDiscount) / 100 : 0;
-                        const calculatedPaid = subtotal - savings;
-                        
+                        const { unitPrice, discountAmount: savings, totalPrice: calculatedPaid } =
+                          calculateBookingTotal(selectedEvent, b.quantity, b.ticketType);
+                        const hasDiscount = savings > 0;
+
                         return (
                           <tr key={b._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}>
                             <td style={{ padding: '0.8rem 1rem', fontWeight: 600, color: '#e2e8f0' }}>
@@ -436,7 +496,7 @@ export default function OrgOverview({
                               {new Date(b.bookingDate || b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                             </td>
                             <td style={{ padding: '0.8rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
-                              ₹{calculatedPaid.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                              ₹{(b.totalPrice ?? calculatedPaid).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
                             </td>
                           </tr>
                         );

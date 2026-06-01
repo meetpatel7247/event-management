@@ -23,15 +23,9 @@ export default function AdminApprovals({
   }, [activeList, searchQuery]);
 
   return (
-    <div className="adm-panel">
+    <div className="adm-panel adm-panel--table">
       {/* Segmented controls for switching between Pending and Approved views */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '0.75rem', 
-        marginBottom: '1.5rem', 
-        borderBottom: '1px solid rgba(255,255,255,0.06)', 
-        paddingBottom: '1rem' 
-      }}>
+      <div className="adm-approvals-subtabs">
         <button
           onClick={() => { setSubTab('Pending'); setSearchQuery(''); }}
           style={{
@@ -93,7 +87,7 @@ export default function AdminApprovals({
       </div>
 
       {/* Search and Header info */}
-      <div className="adm-search-bar" style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+      <div className="adm-search-bar">
         <div className="adm-search-input-wrap">
           <span className="adm-search-icon">🔍</span>
           <input 
@@ -103,13 +97,13 @@ export default function AdminApprovals({
             onChange={e => setSearchQuery(e.target.value)} 
           />
         </div>
-        <div style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '500' }}>
+        <span className="adm-search-meta">
           {filtered.length} organizer{filtered.length !== 1 ? 's' : ''} listed
-        </div>
+        </span>
       </div>
 
       <div className="adm-table-wrap">
-        <table className="adm-table">
+        <table className="adm-table adm-table--standard">
           <thead>
             <tr>
               <th>ORGANIZER NAME</th>

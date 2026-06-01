@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import GlassCard from '../components/GlassCard/GlassCard';
 import styles from './Offers.module.css';
 import { toast } from 'react-toastify';
 import Spinner from '../components/Spinner/Spinner';

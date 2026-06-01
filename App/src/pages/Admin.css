@@ -1,13 +1,25 @@
 /* ── Root ────────────────────────────────────────────────────────── */
 .adm-root {
-  max-width: 100%;
   width: 100%;
-  margin: 0 auto;
-  padding: 2rem 1rem 4rem;
+  max-width: var(--content-max);
+  margin-left: auto;
+  margin-right: auto;
+  padding: 2rem 0 4rem;
   font-family: 'Inter', 'Outfit', sans-serif;
   color: #e2e8f0;
   box-sizing: border-box;
   overflow-x: hidden;
+  min-width: 0;
+  flex-shrink: 0;
+}
+
+/* Shared column: header, tabs, and every tab panel align to the same width */
+.adm-header,
+.adm-tabs,
+.adm-panel {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .adm-loading {
@@ -72,20 +84,41 @@
 
 /* ── Tabs ────────────────────────────────────────────────────────── */
 .adm-tabs {
-  display: flex; gap: 0.25rem; margin-bottom: 1.75rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.25rem;
+  margin-bottom: 1.75rem;
   background: rgba(255,255,255,0.04);
-  border-radius: 12px; padding: 0.35rem;
-  width: 100%;
+  border-radius: 12px;
+  padding: 0.35rem;
   box-sizing: border-box;
-  flex-wrap: wrap;
+}
+
+@media (max-width: 640px) {
+  .adm-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .adm-tab {
-  flex: 1; background: transparent; border: none;
-  color: #94a3b8; font-size: 0.9rem; font-weight: 500;
-  padding: 0.6rem 1rem; border-radius: 8px; cursor: pointer;
+  width: 100%;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
   transition: background 0.2s, color 0.2s;
-  display: flex; align-items: center; justify-content: center; gap: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .adm-tab:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
 .adm-tab-active { background: rgba(236,72,153,0.2); color: #ec4899; font-weight: 600; }
@@ -98,16 +131,34 @@
 .adm-panel {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   animation: admFadeIn 0.25s ease;
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Users / Approvals / Events — same full-width column as Overview cards */
+.adm-panel--table .adm-search-bar,
+.adm-panel--table .adm-approvals-subtabs,
+.adm-panel--table .adm-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 @keyframes admFadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
 /* ── Stat Cards ─────────────────────────────────────────────────── */
 .adm-stats-grid {
-  display: grid; grid-template-columns: repeat(3,1fr);
-  gap: 1rem; margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 .adm-engagement-table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
 @media (max-width: 900px) { .adm-stats-grid { grid-template-columns: repeat(2,1fr); } }
@@ -145,8 +196,12 @@
 
 /* ── Charts ─────────────────────────────────────────────────────── */
 .adm-charts-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 1.25rem; margin-bottom: 2rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 .adm-charts-row .dash-chart-card { margin: 0; }
 @media (max-width: 700px) { .adm-charts-row { grid-template-columns: 1fr; } }
@@ -432,8 +487,33 @@
 .adm-modal-real-chart .adm-shares-chart { width: 100%; justify-content: center; }
 .adm-modal-real-chart .adm-likes-chart { width: 100%; max-height: 260px; }
 
+/* ── Overview analytics (organizer / user cards) ─────────────────── */
+.adm-analytics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin-top: 2rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+@media (max-width: 960px) {
+  .adm-analytics-grid { grid-template-columns: 1fr; }
+}
+
+.adm-analytics-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
 /* ── Section ─────────────────────────────────────────────────────── */
-.adm-section { margin-top: 0.5rem; }
+.adm-section { margin-top: 0.5rem; width: 100%; box-sizing: border-box; }
 .adm-section-title { font-size: 1.1rem; font-weight: 700; margin: 0 0 1rem; color: #e2e8f0; }
 .adm-empty { color: #475569; text-align: center; padding: 2.5rem 0; font-size: 0.9rem; }
 
@@ -482,14 +562,34 @@
 
 /* ── Search + Filter Bar ─────────────────────────────────────────── */
 .adm-search-bar {
-  display: flex; gap: 1rem; margin-bottom: 1.25rem;
-  flex-wrap: wrap; align-items: center;
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
 }
 .adm-search-input-wrap {
-  flex: 1; display: flex; align-items: center; gap: 0.6rem;
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 10px; padding: 0.55rem 1rem; min-width: 200px;
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 0.55rem 1rem;
+  min-width: 0;
   transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.adm-search-meta {
+  flex: 0 0 auto;
+  color: #94a3b8;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
 }
 .adm-search-input-wrap:focus-within { border-color: rgba(236,72,153,0.5); }
 .adm-search-icon { font-size: 0.9rem; color: #475569; }
@@ -512,24 +612,78 @@
   color: #ec4899; font-weight: 600;
 }
 
+/* Approvals sub-navigation (Pending / Approved) */
+.adm-approvals-subtabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  padding-bottom: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 /* ── Table ───────────────────────────────────────────────────────── */
 .adm-table-wrap {
   width: 100%;
   max-width: 100%;
   overflow-x: auto;
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.03);
   box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
 }
+.adm-table-wrap::-webkit-scrollbar { height: 6px; }
+.adm-table-wrap::-webkit-scrollbar-thumb {
+  background: rgba(236, 72, 153, 0.35);
+  border-radius: 4px;
+}
+
 .adm-table {
   width: 100%;
-  min-width: 850px;
+  min-width: 0;
   border-collapse: collapse;
   font-size: 0.88rem;
   box-sizing: border-box;
 }
+
+/* Standard 6-column tables (Users, Approvals) — fill box like Overview grid */
+.adm-table--standard {
+  width: 100%;
+  table-layout: fixed;
+}
+.adm-table--standard th:nth-child(1),
+.adm-table--standard td:nth-child(1) { width: 16%; }
+.adm-table--standard th:nth-child(2),
+.adm-table--standard td:nth-child(2) { width: 26%; }
+.adm-table--standard th:nth-child(3),
+.adm-table--standard td:nth-child(3) { width: 12%; }
+.adm-table--standard th:nth-child(4),
+.adm-table--standard td:nth-child(4) { width: 14%; }
+.adm-table--standard th:nth-child(5),
+.adm-table--standard td:nth-child(5) { width: 16%; }
+.adm-table--standard th:nth-child(6),
+.adm-table--standard td:nth-child(6) { width: 16%; }
+
+.adm-table--wide {
+  min-width: 880px;
+  table-layout: auto;
+}
 .adm-table--small {
-  min-width: 100% !important;
+  min-width: 0 !important;
+  table-layout: auto;
+}
+
+.adm-table--standard td,
+.adm-table--standard th {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adm-table--standard td:nth-child(2) {
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 .adm-table thead tr {
   background: rgba(255,255,255,0.04);

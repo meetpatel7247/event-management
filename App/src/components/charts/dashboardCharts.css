@@ -421,7 +421,12 @@
 
 /* ── Category pie wedges (organizer) ──────────────────────────────── */
 .dash-pie-chart { display: flex; align-items: center; justify-content: center; gap: 2rem; min-height: var(--dash-h, 200px); width: 100%; }
-.dash-pie-svg { width: 140px; height: 140px; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); }
+.dash-pie-svg {
+  width: var(--dash-pie-size, 140px);
+  height: var(--dash-pie-size, 140px);
+  flex-shrink: 0;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35));
+}
 .dash-pie-legend { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
 .dash-pie-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #94a3b8; padding: 0.25rem 0; }
 .dash-pie-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
@@ -469,13 +474,68 @@
   .dash-shares-chart, .dash-cat-donut-chart, .dash-pie-chart { flex-direction: column; align-items: stretch; }
 }
 
-/* Centering overrides specifically inside organizer popups/modals */
+/* Organizer stat modals — full chart visible (no bottom clip) */
 .org-modal-real-chart .dash-pie-chart {
   flex-direction: row !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 3rem !important;
+  gap: 2rem !important;
   min-height: auto !important;
+  max-height: none !important;
+  width: 100%;
+  padding: 0.25rem 0 0.5rem;
+  box-sizing: border-box;
+}
+.org-modal-real-chart .dash-pie-svg {
+  width: min(240px, 32vmin) !important;
+  height: min(240px, 32vmin) !important;
+  filter: drop-shadow(0 8px 24px rgba(139, 92, 246, 0.45));
+}
+.org-modal-real-chart .dash-pie-svg-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+.org-modal-real-chart .dash-rev-h-chart {
+  min-height: var(--dash-h, 300px);
+  max-height: var(--dash-h, 300px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 0.5rem;
+  box-sizing: border-box;
+}
+.org-modal-real-chart .dash-tickets-wrap {
+  min-height: auto;
+  max-height: none;
+  overflow: visible;
+  align-items: stretch;
+  padding-bottom: 0.25rem;
+}
+.org-modal-real-chart .dash-tickets-scroll {
+  overflow-x: auto;
+  overflow-y: visible;
+}
+.org-modal-real-chart .dash-tickets-chart {
+  height: calc(var(--dash-h, 300px) - 24px);
+  min-height: calc(var(--dash-h, 300px) - 24px);
+  padding-bottom: 24px;
+  box-sizing: content-box;
+}
+.org-modal-real-chart .dash-tickets-ylabels {
+  padding-bottom: 24px;
+}
+.org-modal-real-chart .dash-attend-chart {
+  min-height: var(--dash-h, 300px);
+  max-height: var(--dash-h, 300px);
+  overflow-y: auto;
+  padding-bottom: 0.5rem;
+}
+.org-modal-real-chart .dash-chart-empty {
+  min-height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .org-modal-real-chart .dash-pie-legend {
@@ -495,10 +555,17 @@
   .org-modal-real-chart .dash-pie-chart {
     flex-direction: column !important;
     align-items: center !important;
-    gap: 1.5rem !important;
+    gap: 1.25rem !important;
+    padding-bottom: 1rem !important;
+  }
+  .org-modal-real-chart .dash-pie-svg {
+    width: min(200px, 55vw) !important;
+    height: min(200px, 55vw) !important;
   }
   .org-modal-real-chart .dash-pie-legend {
     align-items: center !important;
+    max-height: 140px;
+    overflow-y: auto;
   }
   .org-modal-real-chart .dash-pie-legend-item {
     justify-content: center !important;

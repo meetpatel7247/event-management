@@ -15,18 +15,6 @@ class ApiError extends Error {
 }
 
 /**
- * Standard API Response structure
- */
-class ApiResponse {
-  constructor(statusCode, data, message = 'Success') {
-    this.statusCode = statusCode;
-    this.data = data;
-    this.message = message;
-    this.success = statusCode < 400;
-  }
-}
-
-/**
  * Utility function to catch async errors and pass them to the global error handler
  */
 const catchAsync = (fn) => (req, res, next) => {
@@ -35,6 +23,5 @@ const catchAsync = (fn) => (req, res, next) => {
 
 module.exports = {
   ApiError,
-  ApiResponse,
   catchAsync,
 };
