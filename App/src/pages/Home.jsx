@@ -275,20 +275,24 @@ const Home = ({ searchTerm, searchLocation }) => {
                 </div>
             ) : !searchTerm && !searchLocation && !category && view !== 'all' ? (
                 <>
-                    <HeroSlider />
-                    <CategoryRow />
-                    {[
-                        { title: "Recommended Events", events: events },
-                        { title: "Music & Concerts", events: events.filter(e => e.category === 'Music' || e.category === 'Concert') },
-                        { title: "The Best of Live Events", events: events.slice().reverse() },
-                        { title: "Sports Action", events: events.filter(e => e.category === 'Sport') },
-                        { title: "Technical Workshops", events: events.filter(e => e.category === 'Technology') }
-                    ].map((section, index) => (
-                        <EventCarousel key={index} title={section.title} events={section.events} loading={loading} />
-                    ))}
+                    <div className="home-hero-bleed">
+                        <HeroSlider />
+                    </div>
+                    <div className="home-section-pad">
+                        <CategoryRow />
+                        {[
+                            { title: "Recommended Events", events: events },
+                            { title: "Music & Concerts", events: events.filter(e => e.category === 'Music' || e.category === 'Concert') },
+                            { title: "The Best of Live Events", events: events.slice().reverse() },
+                            { title: "Sports Action", events: events.filter(e => e.category === 'Sport') },
+                            { title: "Technical Workshops", events: events.filter(e => e.category === 'Technology') }
+                        ].map((section, index) => (
+                            <EventCarousel key={index} title={section.title} events={section.events} loading={loading} />
+                        ))}
+                    </div>
                 </>
             ) : (
-                <section style={{ marginTop: '2rem' }}>
+                <section className="home-section-pad" style={{ marginTop: '2rem' }}>
                     <CategoryRow />
                     {(!loading && filteredEvents.length === 0) ? (
                         <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '4rem', minHeight: '30vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
