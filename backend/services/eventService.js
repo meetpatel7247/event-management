@@ -72,18 +72,6 @@ async function incrementShares(id) {
   );
 }
 
-/** Admin: zero all event likes/shares and clear every user wishlist */
-async function resetAllEngagement() {
-  const [eventResult, userResult] = await Promise.all([
-    EventModel.updateMany({}, { $set: { likes: 0, shares: 0 } }),
-    UserModel.updateMany({}, { $set: { wishlist: [] } }),
-  ]);
-  return {
-    eventsModified: eventResult.modifiedCount ?? eventResult.nModified ?? 0,
-    usersModified: userResult.modifiedCount ?? userResult.nModified ?? 0,
-  };
-}
-
 module.exports = {
   listEvents,
   listEventsByOrganizer,
@@ -93,5 +81,4 @@ module.exports = {
   deleteEvent,
   adjustLikes,
   incrementShares,
-  resetAllEngagement,
 };

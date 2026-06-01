@@ -10,9 +10,6 @@ router.get('/', optionalAuthenticate, eventController.getEvents);
 // GET /api/events/my-events — organizer sees only their own events
 router.get('/my-events', authenticate, eventController.getMyEvents);
 
-// DELETE /api/events/reset-engagement — admin: zero likes/shares and wishlists
-router.delete('/reset-engagement', authenticate, eventController.resetEngagement);
-
 // POST /api/events/:id/like — { action: 'like' | 'unlike' }
 router.post('/:id/like', optionalAuthenticate, eventController.toggleLike);
 
