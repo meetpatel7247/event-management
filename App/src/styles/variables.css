@@ -23,6 +23,15 @@
     --shadow-glow: 0 0 15px rgba(0, 243, 255, 0.6), 0 0 30px rgba(0, 243, 255, 0.4);
     --shadow-card: 0 0 10px rgba(188, 19, 254, 0.2);
 
+    /* Card System Design Tokens */
+    --card-bg: rgba(10, 10, 15, 0.95);
+    --card-border: 1px solid rgba(0, 243, 255, 0.2);
+    --card-radius: 16px;
+    --card-padding: 1.5rem;
+    --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37), 0 0 12px rgba(188, 19, 254, 0.15);
+    --card-height: 440px;
+    --card-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
     /* Layout */
     --max-width: 100%;
     --nav-height: 80px;

@@ -47,6 +47,15 @@ const EventDetails = () => {
 
             const data = await eventApi.getEventById(id);
             if (data) {
+                const isApproved = data.isApproved;
+                const isAdmin = user && user.role === 'admin';
+                
+                if (!isApproved && !isAdmin) {
+                    toast.error('Access Denied: Only Admins can view pending events.');
+                    navigate('/');
+                    return;
+                }
+
                 const mappedEvent = {
                     ...data,
                     isLiked: wishlistIds.has(data._id.toString())
@@ -138,7 +147,26 @@ const EventDetails = () => {
                                     </div>
                                 </div>
 
-                                <BookingPanel event={event} quantity={quantity} setQuantity={setQuantity} discountInfo={discountInfo} handleBook={handleBook} />
+                                {event.isApproved ? (
+                                    <BookingPanel event={event} quantity={quantity} setQuantity={setQuantity} discountInfo={discountInfo} handleBook={handleBook} />
+                                ) : (
+                                    <div style={{
+                                        background: 'rgba(245, 158, 11, 0.08)',
+                                        border: '1px solid rgba(245, 158, 11, 0.25)',
+                                        borderRadius: '12px',
+                                        padding: '1.25rem',
+                                        marginBottom: '1.5rem',
+                                        color: '#f59e0b',
+                                        fontSize: '0.88rem',
+                                        lineHeight: '1.45',
+                                        display: 'flex',
+                                        gap: '0.5rem',
+                                        alignItems: 'center'
+                                    }}>
+                                        <span>⚠️</span>
+                                        <span><strong>Booking Disabled:</strong> This event is currently pending approval. Ticket bookings will be enabled once it is approved by the admin.</span>
+                                    </div>
+                                )}
 
                                 <div>
                                     <h3 className={styles.descriptionTitle}>About this Event</h3>

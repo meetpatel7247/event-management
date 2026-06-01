@@ -10,6 +10,12 @@ async function createBooking({ userId, eventId, quantity, totalPrice, ticketType
     throw err;
   }
 
+  if (!event.isApproved) {
+    const err = new Error('Cannot book an event that is not approved');
+    err.status = 400;
+    throw err;
+  }
+
   // Block booking of past events
   const eventDate = new Date(event.date);
   const today = new Date();
@@ -59,10 +65,16 @@ async function listAllBookings() {
   return await BookingModel.find().populate(['user', 'event']);
 }
 
-/** Returns bookings only for events owned by this organizer */
+/** Returns bookings only for events owned by this organizer or general seeded events (available to all) */
 async function listBookingsByOrganizer(organizerId) {
-  // Find all events by this organizer first
-  const events = await EventModel.find({ organizerId }).select('_id');
+  // Find all events by this organizer first, including seeded general events
+  const events = await EventModel.find({
+    $or: [
+      { organizerId },
+      { organizerId: null },
+      { organizerId: { $exists: false } }
+    ]
+  }).select('_id');
   const eventIds = events.map(e => e._id);
   return await BookingModel.find({ event: { $in: eventIds } }).populate(['user', 'event']);
 }

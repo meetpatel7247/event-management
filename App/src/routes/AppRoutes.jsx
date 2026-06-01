@@ -1,4 +1,3 @@
-import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
 // Pages
@@ -25,15 +24,6 @@ import ListEvent from '../pages/ListEvent';
 import Corporates from '../pages/Corporates';
 import GiftCards from '../pages/GiftCards';
 
-/**
- * AppRoutes Component
- * 
- * Central routing configuration for the entire application. Maps URL paths
- * to their respective physical Page components. 
- *
- * @param {string} searchTerm - Global search query forwarded to the Home page context
- * @param {string} searchLocation - Global search location forwarded to the Home page context
- */
 const AppRoutes = ({ searchTerm, searchLocation }) => {
     return (
         <Routes>

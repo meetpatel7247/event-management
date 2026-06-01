@@ -14,7 +14,7 @@ import React, { useState, useEffect } from 'react';
 const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
     const [formData, setFormData] = useState({
         title: '',
-        date: '',
+        date: new Date().toLocaleDateString('en-CA'),
         time: '',
         location: '',
         price: '',
@@ -82,6 +82,11 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        const today = new Date().toLocaleDateString('en-CA');
+        if (formData.date < today) {
+            alert("Event date cannot be in the past. Please select today's date or a future date.");
+            return;
+        }
         onSubmit(formData);
     };
 
@@ -97,6 +102,7 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
                     <input className="premium-input" name="title" value={formData.title}
                         placeholder="Event Title" onChange={handleChange} required />
                     <input className="premium-input" name="date" type="date" value={formData.date}
+                        min={new Date().toLocaleDateString('en-CA')}
                         onChange={handleChange} required />
                     <input className="premium-input" name="time" type="time" value={formData.time}
                         onChange={handleChange} required />
@@ -148,14 +154,73 @@ const CreateEventForm = ({ onSubmit, onCancel, initialData }) => {
                     </div>
                 </div>
 
-                {/* Row 4 – offer settings */}
-                <div style={{ paddingBottom: '1rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                    <input className="premium-input" name="offerMinTickets" type="number"
-                        value={formData.offerMinTickets} placeholder="Min Tickets for Offer (e.g. 3)"
-                        onChange={handleChange} />
-                    <input className="premium-input" name="offerDiscount" type="number"
-                        value={formData.offerDiscount} placeholder="Discount % (e.g. 20)"
-                        onChange={handleChange} />
+                {/* Discount & Special Offers Panel */}
+                <div style={{
+                    background: 'rgba(251,191,36,0.03)',
+                    border: '1px dashed rgba(251,191,36,0.25)',
+                    borderRadius: '12px',
+                    padding: '1.25rem',
+                    marginBottom: '1.5rem',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                        <span style={{ fontSize: '1.2rem' }}>🎁</span>
+                        <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#fbbf24' }}>Discount & Special Offers Panel</h4>
+                        <span style={{ fontSize: '0.75rem', background: 'rgba(251,191,36,0.15)', color: '#fbbf24', padding: '0.1rem 0.5rem', borderRadius: '10px', fontWeight: 600, marginLeft: 'auto' }}>
+                            Increase Booking Volume!
+                        </span>
+                    </div>
+                    <p style={{ margin: '0 0 1rem 0', fontSize: '0.78rem', color: '#94a3b8', lineHeight: '1.4' }}>
+                        Encourage users to buy bulk tickets by setting up a group booking discount. For example, buying 3 or more tickets gets them 15% off the total price.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.8rem', color: '#e2e8f0', fontWeight: 500 }}>
+                                Minimum Tickets Required
+                            </label>
+                            <input 
+                                className="premium-input" 
+                                name="offerMinTickets" 
+                                type="number"
+                                min="1"
+                                value={formData.offerMinTickets} 
+                                placeholder="e.g. 3"
+                                onChange={handleChange} 
+                                style={{ borderColor: formData.offerMinTickets ? 'rgba(251,191,36,0.5)' : 'rgba(255,255,255,0.1)' }}
+                            />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.8rem', color: '#e2e8f0', fontWeight: 500 }}>
+                                Discount Percentage (%)
+                            </label>
+                            <input 
+                                className="premium-input" 
+                                name="offerDiscount" 
+                                type="number"
+                                min="1"
+                                max="100"
+                                value={formData.offerDiscount} 
+                                placeholder="e.g. 20"
+                                onChange={handleChange} 
+                                style={{ borderColor: formData.offerDiscount ? 'rgba(251,191,36,0.5)' : 'rgba(255,255,255,0.1)' }}
+                            />
+                        </div>
+                    </div>
+                    {formData.offerMinTickets && formData.offerDiscount && (
+                        <div style={{ 
+                            marginTop: '0.75rem', 
+                            fontSize: '0.75rem', 
+                            color: '#fbbf24', 
+                            background: 'rgba(251,191,36,0.08)', 
+                            padding: '0.5rem 0.75rem', 
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.35rem',
+                            border: '1px solid rgba(251,191,36,0.15)'
+                        }}>
+                            ✨ <strong>Live Offer:</strong> Buyers purchasing <strong>{formData.offerMinTickets} or more</strong> tickets will receive an automatic <strong>{formData.offerDiscount}% discount</strong> at checkout!
+                        </div>
+                    )}
                 </div>
 
                 {/* Category */}

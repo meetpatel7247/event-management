@@ -8,6 +8,7 @@ function sanitize(user) {
     name: user.name,
     email: user.email,
     role: user.role,
+    isApproved: user.isApproved,
     createdAt: user.createdAt,
   };
 }
@@ -94,6 +95,23 @@ async function deleteUser(id) {
   return { message: 'User deleted' };
 }
 
+async function approveOrganizer(userId) {
+  const user = await UserModel.findById(userId);
+  if (!user) {
+    const err = new Error('User not found');
+    err.status = 404;
+    throw err;
+  }
+  if (user.role !== 'organizer') {
+    const err = new Error('Only organizers can be approved');
+    err.status = 400;
+    throw err;
+  }
+  user.isApproved = true;
+  await user.save();
+  return sanitize(user);
+}
+
 module.exports = {
   sanitize,
   roleAvailability,
@@ -101,4 +119,5 @@ module.exports = {
   getProfile,
   getUsers,
   deleteUser,
+  approveOrganizer,
 };

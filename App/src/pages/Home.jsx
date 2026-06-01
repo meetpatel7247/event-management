@@ -106,7 +106,7 @@ const Home = ({ searchTerm, searchLocation }) => {
     }, [searchTerm, searchLocation, category, events]);
 
     return (
-        <>
+        <div className="home-root">
             {/* Server wake-up notice banner */}
             {slowLoad && (
                 <div style={{
@@ -290,45 +290,26 @@ const Home = ({ searchTerm, searchLocation }) => {
             ) : (
                 <section style={{ marginTop: '2rem' }}>
                     <CategoryRow />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-                        <h2 style={{ fontSize: '2rem' }}>
-                            {searchTerm ? `Search Results for "${searchTerm}"` :
-                                searchLocation ? `Events in ${searchLocation}` :
-                                category ? `${category}s` :
-                                    'All Events'}
-                        </h2>
-                    </div>
-
-                    {loading ? (
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                            {Array.from({ length: 8 }).map((_, i) => (
-                                <div key={i} style={{
-                                    height: '340px',
-                                    borderRadius: '16px',
-                                    background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 75%)',
-                                    backgroundSize: '200% 100%',
-                                    animation: 'shimmer 1.6s infinite',
-                                    border: '1px solid rgba(255,255,255,0.06)',
-                                }} />
-                            ))}
-                            <style>{`@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }`}</style>
-                        </div>
-                    ) : (
-                        <div className="responsive-grid">
-                            {filteredEvents.map((event) => (
-                                <EventCard key={event._id} event={event} isGrid={true} />
-                            ))}
-                        </div>
-                    )}
-
-                    {!loading && filteredEvents.length === 0 && (
-                        <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '2rem' }}>
+                    {(!loading && filteredEvents.length === 0) ? (
+                        <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '4rem', minHeight: '30vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
                             No events found.
                         </div>
+                    ) : (
+                        <EventCarousel 
+                            title={
+                                searchTerm ? `Search Results for "${searchTerm}"` :
+                                searchLocation ? `Events in ${searchLocation}` :
+                                category ? `${category}s` :
+                                'All Events'
+                            }
+                            events={filteredEvents}
+                            loading={loading}
+                            hideSeeAll={true}
+                        />
                     )}
                 </section>
             )}
-        </>
+        </div>
     );
 };
 

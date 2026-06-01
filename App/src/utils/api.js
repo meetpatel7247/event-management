@@ -12,12 +12,25 @@ const api = axios.create({
 
 // Add interceptor to attach token to requests
 api.interceptors.request.use((config) => {
-  const user = JSON.parse(sessionStorage.getItem('user'));
+  const user = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user'));
   if (user && user.token) {
     config.headers.Authorization = `Bearer ${user.token}`;
   }
   return config;
 });
+
+// Add interceptor to handle 401 Unauthorized responses
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      sessionStorage.removeItem('user');
+      localStorage.removeItem('user');
+      window.dispatchEvent(new Event('auth-logout'));
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const eventApi = {
   getEvents: async () => {
@@ -65,7 +78,7 @@ export const authApi = {
   },
   register: async (userData) => {
     const response = await api.post('/auth/register', userData);
-    if (response.data.token) {
+    if (response.data.role !== 'organizer' && response.data.token) {
       sessionStorage.setItem('user', JSON.stringify(response.data));
     }
     return response.data;
@@ -106,6 +119,10 @@ export const adminApi = {
   },
   deleteUser: async (id) => {
     const response = await api.delete(`/users/${id}`);
+    return response.data;
+  },
+  approveOrganizer: async (id) => {
+    const response = await api.put(`/users/${id}/approve`);
     return response.data;
   },
   approveEvent: async (id) => {

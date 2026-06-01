@@ -86,18 +86,26 @@
     overflow-x: auto;
     padding: 1rem 0;
     scroll-snap-type: x mandatory;
-    scrollbar-width: none;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
 }
 
 .track::-webkit-scrollbar {
-    display: none;
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .item {
-    flex: 0 0 calc(25% - 1.5rem);
-    /* Fits 4 items per row with 2rem gap */
-    min-width: 250px;
+    flex: 0 0 280px !important;
+    width: 280px !important;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
+}
+
+@media (max-width: 768px) {
+    .item {
+        flex: 0 0 260px; /* Peek next card beautifully on mobile viewports */
+    }
 }

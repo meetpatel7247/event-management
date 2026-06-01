@@ -4,14 +4,15 @@ import { toast } from 'react-toastify';
 import AdminOverview from '../components/Admin/AdminOverview';
 import AdminEvents from '../components/Admin/AdminEvents';
 import AdminUsers from '../components/Admin/AdminUsers';
+import AdminApprovals from '../components/Admin/AdminApprovals';
 import Spinner from '../components/Spinner/Spinner';
 import './Admin.css';
 import '../components/charts/dashboardCharts.css';
 
-const TABS = ['Overview', 'Events', 'Users'];
+const TABS = ['Overview', 'Events', 'Users', 'Approvals'];
 
 const Admin = () => {
-  const userInfo = JSON.parse(sessionStorage.getItem('user'));
+  const userInfo = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user'));
   if (!userInfo || userInfo.role !== 'admin') {
     return <div style={{ padding: '3rem', textAlign: 'center', color: '#ef4444' }}>⛔ Access Denied — Admins only.</div>;
   }
@@ -49,10 +50,21 @@ const Admin = () => {
   }, []);
 
   /* ── derived stats ── */
-  const totalRevenue    = useMemo(() => bookings.reduce((s, b) => s + (b.totalPrice || 0), 0), [bookings]);
+  const totalRevenue    = useMemo(() => {
+    return bookings.reduce((s, b) => {
+      const ev = events.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
+      if (!ev) return s + (b.totalPrice || 0);
+      const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
+      const subtotal = unitPrice * b.quantity;
+      const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
+      const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
+      return s + (subtotal - savings);
+    }, 0);
+  }, [bookings, events]);
   const pendingEvents   = useMemo(() => events.filter(e => (!e.isApproved && !e.isRejected) || e.hasPendingEdits), [events]);
-  const activeOrgs      = useMemo(() => users.filter(u => u.role === 'organizer').length, [users]);
+  const activeOrgs      = useMemo(() => users.filter(u => u.role === 'organizer' && u.isApproved !== false).length, [users]);
   const platformUsers   = useMemo(() => users.filter(u => u.role === 'user').length, [users]);
+  const pendingOrganizers = useMemo(() => users.filter(u => u.role === 'organizer' && u.isApproved === false), [users]);
 
 
   // Revenue trend
@@ -61,7 +73,18 @@ const Admin = () => {
     bookings.forEach(b => {
       const d = new Date(b.createdAt || b.bookingDate || Date.now());
       const key = d.toLocaleString('en', { month: 'short' });
-      map[key] = (map[key] || 0) + (b.totalPrice || 0);
+      
+      const ev = events.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
+      const paid = (() => {
+        if (!ev) return b.totalPrice || 0;
+        const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
+        const subtotal = unitPrice * b.quantity;
+        const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
+        const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
+        return subtotal - savings;
+      })();
+      
+      map[key] = (map[key] || 0) + paid;
     });
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     const present = months.filter(m => map[m]);
@@ -73,7 +96,7 @@ const Admin = () => {
       });
     }
     return present.map(m => ({ label: m, revenue: map[m] }));
-  }, [bookings]);
+  }, [bookings, events]);
 
   const revenueGrowth = useMemo(() => {
     if (revenueTrend.length < 2) return 0;
@@ -129,12 +152,22 @@ const Admin = () => {
       await adminApi.deleteUser(id);
       if (isSelf) {
         sessionStorage.removeItem('user');
-        window.location.href = '/login';
+        window.location.href = `${import.meta.env.BASE_URL}login`;
       } else {
         setUsers(us => us.filter(u => u._id !== id));
         toast.success('User removed.');
       }
     } catch (e) { toast.error(e.response?.data?.message || 'Failed'); }
+  };
+
+  const handleApproveOrganizer = async (id) => {
+    try {
+      await adminApi.approveOrganizer(id);
+      setUsers(us => us.map(u => u._id === id ? { ...u, isApproved: true } : u));
+      toast.success('Organizer approved successfully!');
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Organizer approval failed');
+    }
   };
 
   const handleResetData = async () => {
@@ -194,9 +227,15 @@ const Admin = () => {
             {tab === 'Overview' && '📊 '}
             {tab === 'Events'   && '📅 '}
             {tab === 'Users'    && '👥 '}
+            {tab === 'Approvals' && '🔑 '}
             {tab}
             {tab === 'Events' && pendingEvents.length > 0 && (
               <span className="adm-tab-badge">{pendingEvents.length}</span>
+            )}
+            {tab === 'Approvals' && pendingOrganizers.length > 0 && (
+              <span className="adm-tab-badge" style={{ background: '#f59e0b', color: '#000' }}>
+                {pendingOrganizers.length}
+              </span>
             )}
           </button>
         ))}
@@ -230,6 +269,15 @@ const Admin = () => {
           filteredUsers={filteredUsers} userSearch={userSearch} 
           setUserSearch={setUserSearch} userFilter={userFilter} 
           setUserFilter={setUserFilter} events={events} 
+          handleDeleteUser={handleDeleteUser} 
+        />
+      )}
+
+      {activeTab === 'Approvals' && (
+        <AdminApprovals 
+          pendingOrganizers={pendingOrganizers} 
+          approvedOrganizers={users.filter(u => u.role === 'organizer' && u.isApproved !== false)}
+          handleApproveOrganizer={handleApproveOrganizer} 
           handleDeleteUser={handleDeleteUser} 
         />
       )}

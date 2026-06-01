@@ -68,6 +68,16 @@ async function getWishlist(req, res, next) {
   }
 }
 
+async function approveOrganizer(req, res, next) {
+  try {
+    const { id } = req.params;
+    const result = await userService.approveOrganizer(id);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getMe,
   getWishlist,
@@ -75,4 +85,5 @@ module.exports = {
   patchMe,
   deleteMe,
   deleteUserAdmin,
+  approveOrganizer,
 };

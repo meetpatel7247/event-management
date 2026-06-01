@@ -5,15 +5,23 @@ const { authenticate } = require('../middleware/auth');
 
 router.use(authenticate);
 
+const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === 'admin') {
+    next();
+  } else {
+    res.status(403).json({ message: 'Access denied — Admins only' });
+  }
+};
+
 // Protected routes (Self-management)
 router.get('/me', userController.getMe);
 router.get('/wishlist', userController.getWishlist);
 router.put('/profile', userController.patchMe);
 router.delete('/me', userController.deleteMe);
 
-// Admin-only user management (assuming authenticate attaches user and middleware can check role)
-// For simplicity, we use same authenticate, but in a real app would add another isAdmin middleware.
-router.get('/', userController.listUsers);
-router.delete('/:id', userController.deleteUserAdmin);
+// Admin-only user management
+router.get('/', isAdmin, userController.listUsers);
+router.put('/:id/approve', isAdmin, userController.approveOrganizer);
+router.delete('/:id', isAdmin, userController.deleteUserAdmin);
 
 module.exports = router;

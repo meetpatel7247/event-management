@@ -4,6 +4,26 @@
     padding: 0 2rem;
 }
 
+.container.home-page-container {
+    padding: 0 1rem;
+}
+
+.container.home-page-container .container,
+.container.home-page-container .adm-root,
+.container.home-page-container .org-root {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.home-root {
+    max-width: 100%;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 1rem 0;
+    box-sizing: border-box;
+    overflow-x: hidden;
+}
+
 /* Neon Animations */
 @keyframes flicker {
 
@@ -36,7 +56,7 @@
    ================== */
 .responsive-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 2rem;
     align-items: stretch;
 }

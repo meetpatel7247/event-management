@@ -6,9 +6,15 @@ async function listEvents(showAll = false) {
   return await EventModel.find(filter).populate('organizerId', 'name email');
 }
 
-/** Returns only events created by this specific organizer */
+/** Returns only events created by this specific organizer or seeded general events (available to all) */
 async function listEventsByOrganizer(organizerId) {
-  return await EventModel.find({ organizerId }).populate('organizerId', 'name email');
+  return await EventModel.find({
+    $or: [
+      { organizerId },
+      { organizerId: null },
+      { organizerId: { $exists: false } }
+    ]
+  }).populate('organizerId', 'name email');
 }
 
 async function findEventById(id) {

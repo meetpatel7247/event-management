@@ -12,6 +12,7 @@ export default function OrgOverview({
   revenueByEvent, categoryData
 }) {
   const [popupData, setPopupData] = useState(null);
+  const [discountCalc, setDiscountCalc] = useState(null);
   const [selectedEventId, setSelectedEventId] = useState('');
   const [showUsersModal, setShowUsersModal] = useState(false);
 
@@ -64,7 +65,7 @@ export default function OrgOverview({
       {showUsersModal && (
         <div className="org-modal-overlay" onClick={() => setShowUsersModal(false)}>
           <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}
-            style={{ maxWidth: '860px', maxHeight: '80vh', overflowY: 'auto' }}>
+            style={{ width: '90%', maxWidth: '820px', maxHeight: '80vh', overflowY: 'auto' }}>
             <button className="org-modal-close" onClick={() => setShowUsersModal(false)}>✕</button>
             <h3 className="org-modal-title">👥 Users Who Booked Your Events</h3>
             <div style={{ marginBottom: '1rem', display: 'flex', gap: '1.5rem', fontSize: '0.82rem', color: '#64748b' }}>
@@ -120,7 +121,8 @@ export default function OrgOverview({
 
       {popupData && (
         <div className="org-modal-overlay" onClick={closePopup}>
-          <div className={`org-modal-content ${popupData.wide ? 'org-modal-content--wide' : ''}`} onClick={e => e.stopPropagation()}>
+          <div className="org-modal-content org-modal-content--wide" onClick={e => e.stopPropagation()}
+            style={{ width: '90%', maxWidth: '820px', maxHeight: '80vh', overflowY: 'auto' }}>
             <button className="org-modal-close" onClick={closePopup}>✕</button>
             <h3 className="org-modal-title">{popupData.title}</h3>
             <div className="org-modal-body">
@@ -131,7 +133,63 @@ export default function OrgOverview({
               <div className="org-modal-real-chart">
                 {renderPopupChart()}
               </div>
-              <p className="org-modal-footer-text">Detailed Statistics</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {discountCalc && (
+        <div className="org-modal-overlay" onClick={() => setDiscountCalc(null)}>
+          <div className="org-modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '440px', background: 'linear-gradient(135deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95))', border: '1px solid rgba(251,191,36,0.3)', boxShadow: '0 20px 40px rgba(0,0,0,0.5)', padding: '1.75rem', borderRadius: '20px' }}>
+            <button className="org-modal-close" onClick={() => setDiscountCalc(null)}>✕</button>
+            <h3 className="org-modal-title" style={{ color: '#fbbf24', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0 0 1rem 0', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.75rem' }}>
+              <span>🎁 Booking Calculation</span>
+            </h3>
+            <div className="org-modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', padding: '0.25rem 0' }}>
+              <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: '1.5' }}>
+                Here is the exact calculation of the bulk discount applied to this attendee's booking for <strong>{discountCalc.title}</strong>:
+              </p>
+              
+              <div style={{ background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#94a3b8' }}>Ticket Unit Price:</span>
+                  <strong style={{ color: '#f3f4f6' }}>₹{discountCalc.price.toLocaleString()}</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#94a3b8' }}>Tickets Booked:</span>
+                  <strong style={{ color: '#f3f4f6' }}>{discountCalc.actualQty} tickets</strong>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#94a3b8' }}>Discount Percentage:</span>
+                  <strong style={{ color: '#fbbf24' }}>{discountCalc.discount}% off</strong>
+                </div>
+                
+                <hr style={{ border: '0', borderTop: '1px solid rgba(255,255,255,0.08)', margin: '0.25rem 0' }} />
+                
+                <div style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Calculation:</div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#94a3b8' }}>1. Subtotal ({discountCalc.actualQty} × ₹{discountCalc.price.toLocaleString()}):</span>
+                  <span style={{ color: '#f3f4f6', fontWeight: 500 }}>₹{(discountCalc.actualQty * discountCalc.price).toLocaleString()}</span>
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem' }}>
+                  <span style={{ color: '#94a3b8' }}>2. Bulk Savings ({discountCalc.discount}%):</span>
+                  <span style={{ color: '#ef4444', fontWeight: 700 }}>-₹{discountCalc.savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                </div>
+                
+                <hr style={{ border: '0', borderTop: '1px dashed rgba(255,255,255,0.08)', margin: '0.25rem 0' }} />
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.05rem', fontWeight: 800 }}>
+                  <span style={{ color: '#fbbf24' }}>Actual Price Paid:</span>
+                  <span style={{ color: '#10b981' }}>₹{discountCalc.paid.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', background: 'rgba(16,185,129,0.06)', border: '1px solid rgba(16,185,129,0.15)', borderRadius: '8px', padding: '0.75rem 1rem', fontSize: '0.8rem', color: '#10b981', lineHeight: '1.45' }}>
+                <span>💡</span>
+                <span>Attendee met the criteria by ordering {discountCalc.actualQty} tickets (minimum required: {discountCalc.minTickets}), saving a total of ₹{discountCalc.savings.toLocaleString(undefined, { maximumFractionDigits: 0 })}.</span>
+              </div>
             </div>
           </div>
         </div>
@@ -281,6 +339,8 @@ export default function OrgOverview({
                   </div>
                 </div>
               </div>
+
+
             </div>
 
             {/* Attendees Details Table */}
@@ -298,36 +358,89 @@ export default function OrgOverview({
                         <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>User Name</th>
                         <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Quantity</th>
                         <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Ticket Type</th>
+                        <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Discount</th>
                         <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'center' }}>Booking Date</th>
                         <th style={{ padding: '0.75rem 1rem', color: '#64748b', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>Total Paid</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {eventBookings.map(b => (
-                        <tr key={b._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}>
-                          <td style={{ padding: '0.8rem 1rem', fontWeight: 600, color: '#e2e8f0' }}>
-                            <div>{b.user?.name || 'Guest User'}</div>
-                            <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 400 }}>{b.user?.email || ''}</div>
-                          </td>
-                          <td style={{ padding: '0.8rem 1rem', textAlign: 'center', color: '#e2e8f0', fontWeight: 600 }}>{b.quantity}</td>
-                          <td style={{ padding: '0.8rem 1rem', textAlign: 'center' }}>
-                            <span style={{ 
-                              padding: '0.15rem 0.5rem', 
-                              borderRadius: '6px', 
-                              fontSize: '0.65rem', 
-                              fontWeight: 700,
-                              background: b.ticketType === 'VVIP' ? 'rgba(236,72,153,0.15)' : b.ticketType === 'VIP' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.06)',
-                              color: b.ticketType === 'VVIP' ? '#ec4899' : b.ticketType === 'VIP' ? '#a78bfa' : '#cbd5e1'
-                            }}>
-                              {b.ticketType || 'Normal'}
-                            </span>
-                          </td>
-                          <td style={{ padding: '0.8rem 1rem', textAlign: 'center', color: '#64748b' }}>
-                            {new Date(b.bookingDate || b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                          </td>
-                          <td style={{ padding: '0.8rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>₹{(b.totalPrice || 0).toLocaleString()}</td>
-                        </tr>
-                      ))}
+                      {eventBookings.map(b => {
+                        const unitPrice = b.ticketType === 'VVIP' ? (selectedEvent.vvipPrice || 0) : b.ticketType === 'VIP' ? (selectedEvent.vipPrice || 0) : (selectedEvent.price || 0);
+                        const subtotal = unitPrice * b.quantity;
+                        const hasDiscount = selectedEvent.offerDiscount > 0 && selectedEvent.offerMinTickets > 0 && b.quantity >= selectedEvent.offerMinTickets;
+                        const savings = hasDiscount ? (subtotal * selectedEvent.offerDiscount) / 100 : 0;
+                        const calculatedPaid = subtotal - savings;
+                        
+                        return (
+                          <tr key={b._id} style={{ borderBottom: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}>
+                            <td style={{ padding: '0.8rem 1rem', fontWeight: 600, color: '#e2e8f0' }}>
+                              <div>{b.user?.name || 'Guest User'}</div>
+                              <div style={{ fontSize: '0.7rem', color: '#64748b', fontWeight: 400 }}>{b.user?.email || ''}</div>
+                            </td>
+                            <td style={{ padding: '0.8rem 1rem', textAlign: 'center', color: '#e2e8f0', fontWeight: 600 }}>{b.quantity}</td>
+                            <td style={{ padding: '0.8rem 1rem', textAlign: 'center' }}>
+                              <span style={{ 
+                                padding: '0.15rem 0.5rem', 
+                                borderRadius: '6px', 
+                                fontSize: '0.65rem', 
+                                fontWeight: 700,
+                                background: b.ticketType === 'VVIP' ? 'rgba(236,72,153,0.15)' : b.ticketType === 'VIP' ? 'rgba(139,92,246,0.15)' : 'rgba(255,255,255,0.06)',
+                                color: b.ticketType === 'VVIP' ? '#ec4899' : b.ticketType === 'VIP' ? '#a78bfa' : '#cbd5e1'
+                              }}>
+                                {b.ticketType || 'Normal'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.8rem 1rem', textAlign: 'center' }}>
+                              {savings > 0 ? (
+                                <button 
+                                  onClick={() => setDiscountCalc({
+                                    title: selectedEvent.title,
+                                    price: unitPrice,
+                                    discount: selectedEvent.offerDiscount,
+                                    minTickets: selectedEvent.offerMinTickets,
+                                    actualQty: b.quantity,
+                                    savings: savings,
+                                    paid: calculatedPaid
+                                  })}
+                                  title="Click to view booking calculation"
+                                  style={{
+                                    padding: '0.15rem 0.5rem', 
+                                    borderRadius: '6px', 
+                                    fontSize: '0.68rem', 
+                                    fontWeight: 700,
+                                    background: 'rgba(251,191,36,0.15)',
+                                    color: '#fbbf24',
+                                    border: '1px solid rgba(251,191,36,0.3)',
+                                    cursor: 'pointer',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '0.2rem',
+                                    transition: 'all 0.2s ease',
+                                  }}
+                                  onMouseEnter={e => {
+                                    e.currentTarget.style.background = 'rgba(251,191,36,0.25)';
+                                    e.currentTarget.style.transform = 'scale(1.05)';
+                                  }}
+                                  onMouseLeave={e => {
+                                    e.currentTarget.style.background = 'rgba(251,191,36,0.15)';
+                                    e.currentTarget.style.transform = 'scale(1)';
+                                  }}
+                                >
+                                  🎁 {selectedEvent.offerDiscount}%
+                                </button>
+                              ) : (
+                                <span style={{ color: '#475569', fontSize: '0.75rem' }}>—</span>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.8rem 1rem', textAlign: 'center', color: '#64748b' }}>
+                              {new Date(b.bookingDate || b.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </td>
+                            <td style={{ padding: '0.8rem 1rem', textAlign: 'right', color: '#10b981', fontWeight: 700 }}>
+                              ₹{calculatedPaid.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -335,7 +448,7 @@ export default function OrgOverview({
             </div>
           </div>
         ) : (
-          <div style={{ textAlign: 'center', padding: '2.5rem 1rem', color: '#475569', fontSize: '0.88rem', fontStyle: 'italic', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.05)' }}>
+          <div style={{ minHeight: '260px', display: 'flex', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '2rem 1.5rem', color: '#475569', fontSize: '0.88rem', fontStyle: 'italic', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.05)', boxSizing: 'border-box' }}>
             Select one of your created events from the dropdown above to view real-time bookings, seats configuration, and ticket purchasers.
           </div>
         )}

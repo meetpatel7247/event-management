@@ -13,7 +13,7 @@ import styles from './EventCarousel.module.css';
  * @param {Array} events - The array of event objects to render inside this carousel
  * @param {boolean} loading - Whether the parent is still fetching data from server
  */
-const EventCarousel = ({ title, events, loading }) => {
+const EventCarousel = ({ title, events, loading, hideSeeAll = false }) => {
     const trackRef = useRef(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -48,12 +48,12 @@ const EventCarousel = ({ title, events, loading }) => {
     const SkeletonCard = () => (
         <div style={{
             minWidth: '280px',
-            height: '340px',
-            borderRadius: '16px',
+            height: 'var(--card-height)',
+            borderRadius: 'var(--card-radius)',
             background: 'linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.09) 50%, rgba(255,255,255,0.04) 75%)',
             backgroundSize: '200% 100%',
             animation: 'shimmer 1.6s infinite',
-            border: '1px solid rgba(255,255,255,0.06)',
+            border: 'var(--card-border)',
             flexShrink: 0,
         }} />
     );
@@ -68,7 +68,7 @@ const EventCarousel = ({ title, events, loading }) => {
             `}</style>
             <div className={styles.header}>
                 <h2 className={styles.title}>{title}</h2>
-                <Link to="/?view=all" className={styles.seeAll}>See All ›</Link>
+                {!hideSeeAll && <Link to="/?view=all" className={styles.seeAll}>See All ›</Link>}
             </div>
 
             {canScrollLeft && (

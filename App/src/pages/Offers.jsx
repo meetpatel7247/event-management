@@ -41,7 +41,7 @@ const Offers = () => {
                 Discover exclusive discounts and benefits for your favorite events. Book more, save more!
             </p>
 
-            <div className={styles.offersGrid}>
+            <div className="responsive-grid">
                 {offers.map((offer) => (
                     <div key={offer._id} className={styles.offerCard}>
                         <div className={styles.discountBadge}>
@@ -57,7 +57,7 @@ const Offers = () => {
                             )}
                         </div>
                         <div className={styles.offerFooter}>
-                            <button className="premium-button" onClick={() => window.location.href = '/'}>
+                            <button className="premium-button" onClick={() => window.location.href = import.meta.env.BASE_URL}>
                                 Find Events
                             </button>
                         </div>

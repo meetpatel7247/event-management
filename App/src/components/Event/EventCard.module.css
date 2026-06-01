@@ -4,9 +4,14 @@
     display: flex;
     flex-direction: column;
     cursor: pointer;
-    height: 100%;
-    min-height: unset;
-    border: 1px solid var(--border-color);
+    width: 280px !important; /* Strictly enforced fixed premium width on desktop */
+    height: 440px !important; /* Strictly enforced fixed premium height on desktop */
+    border: var(--card-border);
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    box-shadow: var(--card-shadow);
+    transition: var(--card-transition);
+    margin: 0 !important; /* Keep left-aligned inside items, matching the home page! */
 }
 
 .imgContainer {
@@ -17,29 +22,35 @@
 }
 
 .contentContainer {
-    padding: 1.25rem;
+    padding: var(--card-padding);
     flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
+    justify-content: space-between; /* Enforce uniform distribution of content */
 }
 
 .date {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: var(--secondary-color);
     text-transform: uppercase;
     letter-spacing: 2px;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
     font-weight: 600;
+    height: 20px;
+    display: flex;
+    align-items: center;
 }
 
 .title {
-    font-size: 1.3rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 0.25rem;
     font-weight: 700;
-    line-height: 1.4;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+    line-height: 1.3;
+    height: 42px; /* Fixed height handles 1 or 2 lines perfectly */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     color: #fff;
     text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
@@ -47,72 +58,49 @@
 
 .location {
     color: var(--text-muted);
-    font-size: 0.95rem;
-    margin-bottom: 1rem;
-    flex: 1;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+    height: 38px; /* Fixed height handles 1 or 2 lines perfectly */
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
 .price {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
     font-weight: bold;
     color: var(--primary-color);
-    margin-bottom: 1rem;
+    margin-bottom: 0.4rem;
+    height: 24px;
+    display: flex;
+    align-items: center;
     text-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
 }
 
 .bookBtn {
     width: 100%;
-    font-size: 1.05rem;
-    padding: 12px;
+    font-size: 1rem;
+    padding: 10px;
     font-weight: bold;
     letter-spacing: 1px;
 }
 
 @media (max-width: 768px) {
-    /* DEFAULT (Carousel layout) */
+    .cardWrapper {
+        width: 100% !important;
+        max-width: 320px !important;
+        height: auto !important;
+        min-height: 380px !important;
+        margin: 0 auto !important;
+    }
+    
     .imgContainer {
-        height: 140px;
+        height: 160px;
     }
     
     .contentContainer {
-        padding: 0.85rem;
-    }
-
-    /* GRID ONLY (Horizontal list layout) */
-    .cardWrapper[data-layout="grid"] {
-        flex-direction: row;
-        align-items: stretch;
-    }
-
-    .cardWrapper[data-layout="grid"] .imgContainer {
-        width: 140px;
-        height: auto;
-        border-right: 1px solid rgba(0, 243, 255, 0.1);
-        border-bottom: none;
-    }
-    
-    .cardWrapper[data-layout="grid"] .contentContainer {
-        padding: 0.85rem;
-        justify-content: center;
-    }
-
-    .cardWrapper[data-layout="grid"] .location {
-        display: none;
-    }
-
-    .cardWrapper[data-layout="grid"] .title {
-        white-space: normal;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-    }
-    
-    .cardWrapper[data-layout="grid"] .price {
-        margin-top: 0.2rem;
+        padding: 1rem;
     }
 
     /* COMMON TEXT RESIZING */
@@ -142,85 +130,142 @@
     }
 }
 
-/* ── Like & Share Action Buttons ─────────────────────────────────── */
+/* ── Like & Share Action Buttons — Orbital Design ─────────────────── */
 .cardActions {
     position: absolute;
     top: 10px;
     right: 10px;
     display: flex;
-    gap: 0.4rem;
+    flex-direction: column;
+    gap: 0.45rem;
     z-index: 10;
 }
 
+/* ── Main Button (icon + count stacked inside) ── */
 .actionBtn {
+    position: relative;
+    width: 36px;
+    height: 46px;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(10, 8, 30, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    min-width: 32px;
-    height: 32px;
-    padding: 0 6px;
-    width: auto;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(10, 5, 30, 0.65);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    color: #e2e8f0;
-    font-size: 1rem;
+    gap: 1px;
     cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
-    line-height: 1;
-    padding: 0;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    padding: 2px 0;
+    overflow: hidden; /* Ensures no content ever overflows the box boundaries */
+    box-sizing: border-box;
 }
 
 .actionBtn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.12);
     border-color: rgba(255, 255, 255, 0.35);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: scale(1.12);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-.actionBtnLiked {
-    background: rgba(236, 72, 153, 0.22);
-    border-color: rgba(236, 72, 153, 0.55);
+.actionIcon {
+    font-size: 0.95rem;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+/* ── Count (inside button, below the icon) ── */
+.actionCount {
+    font-size: 0.58rem;
+    font-weight: 800;
+    line-height: 1.1;
+    color: rgba(255, 255, 255, 0.8);
+    position: relative;
+    z-index: 2;
+    letter-spacing: 0.02em;
+    transition: color 0.3s ease;
+    width: 100%;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Fallback ellipsis if count grows extremely long */
+}
+
+.actionCountPink {
     color: #f9a8d4;
 }
 
-.actionBtnLiked:hover {
-    background: rgba(236, 72, 153, 0.35);
-    border-color: rgba(236, 72, 153, 0.75);
-}
-
-.actionBtnCopied {
-    background: rgba(16, 185, 129, 0.22);
-    border-color: rgba(16, 185, 129, 0.55);
+.actionCountGreen {
     color: #6ee7b7;
 }
 
-.actionLabel {
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.02em;
+/* ── Orbital Ring ── */
+.actionRing {
+    position: absolute;
+    inset: -3px;
+    border-radius: 12px;
+    border: 1.5px solid transparent;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.actionCount {
-    font-size: 0.65rem;
-    font-weight: 700;
-    line-height: 1;
-    opacity: 0.95;
+/* Active orbital ring — glowing pink pulsing border */
+.actionRingActive {
+    border-color: rgba(236, 72, 153, 0.6);
+    box-shadow: 0 0 14px rgba(236, 72, 153, 0.35);
+    animation: ringPulse 2s ease-in-out infinite;
 }
 
-/* Heart bounce keyframe */
+@keyframes ringPulse {
+    0%   { box-shadow: 0 0 8px rgba(236, 72, 153, 0.25); border-color: rgba(236, 72, 153, 0.5); }
+    50%  { box-shadow: 0 0 20px rgba(236, 72, 153, 0.55); border-color: rgba(251, 113, 133, 0.8); }
+    100% { box-shadow: 0 0 8px rgba(236, 72, 153, 0.25); border-color: rgba(236, 72, 153, 0.5); }
+}
+
+/* ── Liked state ── */
+.actionBtnLiked {
+    background: rgba(236, 72, 153, 0.15);
+    border-color: rgba(236, 72, 153, 0.5);
+    box-shadow: 0 0 16px rgba(236, 72, 153, 0.25);
+}
+
+.actionBtnLiked:hover {
+    background: rgba(236, 72, 153, 0.28);
+    border-color: rgba(236, 72, 153, 0.75);
+    box-shadow: 0 0 28px rgba(236, 72, 153, 0.45), 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* ── Copied/shared state ── */
+.actionBtnCopied {
+    background: rgba(16, 185, 129, 0.15);
+    border-color: rgba(16, 185, 129, 0.5);
+    box-shadow: 0 0 16px rgba(16, 185, 129, 0.25);
+}
+
+.actionBtnCopied:hover {
+    background: rgba(16, 185, 129, 0.28);
+    border-color: rgba(16, 185, 129, 0.75);
+}
+
+/* Heart bounce keyframe — juicy spring physics */
 @keyframes heartBounce {
     0%   { transform: scale(1); }
-    30%  { transform: scale(1.45); }
-    60%  { transform: scale(0.88); }
+    20%  { transform: scale(1.6); }
+    40%  { transform: scale(0.8); }
+    60%  { transform: scale(1.25); }
+    80%  { transform: scale(0.95); }
     100% { transform: scale(1); }
 }
 
 .bounce {
-    animation: heartBounce 0.4s ease;
+    animation: heartBounce 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .festivalCard {

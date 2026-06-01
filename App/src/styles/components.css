@@ -1,14 +1,15 @@
 /* Utilities */
 .premium-card {
-    background: rgba(10, 10, 15, 0.9);
-    border: 1px solid rgba(0, 243, 255, 0.3);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-card);
-    padding: 2rem;
-    backdrop-filter: blur(5px);
+    background: var(--card-bg);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    box-shadow: var(--card-shadow);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     position: relative;
     overflow: hidden;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: var(--card-transition);
 }
 
 .premium-card::before {
@@ -24,13 +25,38 @@
 }
 
 .premium-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 243, 255, 0.25);
     border-color: var(--primary-color);
 }
 
 .premium-card:hover::before {
     transform: translateX(100%);
+}
+
+.glass-card {
+    background: rgba(10, 10, 15, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    padding: 2.5rem;
+    color: var(--text-main);
+    box-shadow: var(--card-shadow);
+    transition: var(--card-transition);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    box-sizing: border-box;
+    height: 380px; /* Lock height of these static/info grid cards! */
+}
+
+.glass-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary-color);
+    box-shadow: 0 12px 30px rgba(0, 243, 255, 0.25);
 }
 
 .premium-input {

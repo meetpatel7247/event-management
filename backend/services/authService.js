@@ -18,6 +18,7 @@ function toPublicUser(user, token) {
     name: user.name,
     email: user.email,
     role: user.role,
+    isApproved: user.isApproved,
     token,
   };
 }
@@ -57,14 +58,16 @@ async function register({ email, password, name, role }) {
     throw err;
   }
 
+  const isApproved = r !== 'organizer';
   const user = await UserModel.create({ 
     email: cleanEmail, 
     password, // Hashing is handled by pre-save hook in userModel.js
     name: cleanName, 
-    role: r 
+    role: r,
+    isApproved
   });
 
-  const token = signToken(user);
+  const token = isApproved ? signToken(user) : null;
   return toPublicUser(user, token);
 }
 
@@ -83,6 +86,12 @@ async function login(email, password) {
   if (!isMatch) {
     const err = new Error('Invalid credentials');
     err.status = 401;
+    throw err;
+  }
+
+  if (user.role === 'organizer' && user.isApproved === false) {
+    const err = new Error('Your organizer account is pending admin approval.');
+    err.status = 403;
     throw err;
   }
 

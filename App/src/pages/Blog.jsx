@@ -21,14 +21,8 @@ const Blog = () => {
                 Explore the latest trends in live entertainment, ticketing technologies, and the coolest events happening near you.
             </p>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '2.5rem',
-                width: '100%',
-                marginBottom: '4rem'
-            }}>
-                <div className="glass-card" style={{ padding: '2.5rem', textAlign: 'left', minHeight: '350px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div className="responsive-grid" style={{ width: '100%', marginBottom: '4rem' }}>
+                <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                     <h3 style={{ marginBottom: '1rem', fontSize: '1.6rem' }}>Coming Soon...</h3>
                     <p style={{ color: 'var(--text-muted)', lineHeight: '1.6' }}>
                         The official DEVIT EVENT blog is currently under development. 

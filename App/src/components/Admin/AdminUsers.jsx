@@ -51,7 +51,13 @@ export default function AdminUsers({
                   <td style={{ color:'#94a3b8' }}>{u.email}</td>
                   <td><RoleBadge role={u.role} /></td>
                   <td style={{ color:'#64748b' }}>{new Date(u.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}</td>
-                  <td><span className="adm-badge" style={{ background:'rgba(16,185,129,0.12)', color:'#10b981', border:'1px solid rgba(16,185,129,0.25)' }}>active</span></td>
+                  <td>
+                    {u.role === 'organizer' && u.isApproved === false ? (
+                      <span className="adm-badge" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.25)' }}>pending</span>
+                    ) : (
+                      <span className="adm-badge" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.25)' }}>active</span>
+                    )}
+                  </td>
                   <td>
                     {u.role !== 'admin' && (
                       <button className="adm-icon-btn adm-icon-reject" title="Remove user"

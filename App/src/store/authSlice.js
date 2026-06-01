@@ -6,7 +6,7 @@ import { createSlice } from '@reduxjs/toolkit';
  */
 
 const initialState = {
-    user: sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user')) : null,
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : (sessionStorage.getItem('user') ? JSON.parse(sessionStorage.getItem('user')) : null),
 };
 
 /**
@@ -18,18 +18,28 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         /**
-         * Logs a user in and commits their data to sessionStorage.
+         * Logs a user in and commits their data to sessionStorage and localStorage.
          */
         login: (state, action) => {
             state.user = action.payload;
             sessionStorage.setItem('user', JSON.stringify(action.payload));
+            
+            const stored = localStorage.getItem('user');
+            const newStr = JSON.stringify(action.payload);
+            if (stored !== newStr) {
+                localStorage.setItem('user', newStr);
+            }
         },
         /**
-         * Logs a user out and clears their data from sessionStorage.
+         * Logs a user out and clears their data from sessionStorage and localStorage.
          */
         logout: (state) => {
             state.user = null;
             sessionStorage.removeItem('user');
+            
+            if (localStorage.getItem('user') !== null) {
+                localStorage.removeItem('user');
+            }
         },
         /**
          * Updates partial user information (like changing a name).
@@ -37,6 +47,12 @@ const authSlice = createSlice({
         updateUser: (state, action) => {
             state.user = { ...state.user, ...action.payload };
             sessionStorage.setItem('user', JSON.stringify(state.user));
+            
+            const stored = localStorage.getItem('user');
+            const newStr = JSON.stringify(state.user);
+            if (stored !== newStr) {
+                localStorage.setItem('user', newStr);
+            }
         }
     },
 });

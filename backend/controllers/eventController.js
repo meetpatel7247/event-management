@@ -87,6 +87,14 @@ async function createEvent(req, res, next) {
     if (!payload.title) {
       return res.status(400).json({ error: 'Title is required' });
     }
+
+    if (payload.date) {
+      const today = new Date().toLocaleDateString('en-CA');
+      if (payload.date < today) {
+        return res.status(400).json({ error: 'Event date cannot be in the past' });
+      }
+    }
+
     payload.organizerId = req.user ? req.user.userId : null;
 
     // Auto-set organizerName from DB user record
@@ -122,6 +130,13 @@ async function updateEvent(req, res, next) {
     }
 
     const payload = normalizeEventPayload(req.body);
+    if (payload.date) {
+      const today = new Date().toLocaleDateString('en-CA');
+      if (payload.date < today) {
+        return res.status(400).json({ error: 'Event date cannot be in the past' });
+      }
+    }
+
     if (req.file) {
       payload.image = '/uploads/' + req.file.filename;
     }

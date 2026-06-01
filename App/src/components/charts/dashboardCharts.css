@@ -124,13 +124,9 @@
 
 /* Neon scrollbars */
 .dash-likes-chart::-webkit-scrollbar,
-.dash-cat-legend::-webkit-scrollbar,
-.dash-shares-legend::-webkit-scrollbar,
 .dash-rev-h-chart::-webkit-scrollbar,
 .dash-attend-chart::-webkit-scrollbar { width: 6px; height: 6px; }
 .dash-likes-chart::-webkit-scrollbar-thumb,
-.dash-cat-legend::-webkit-scrollbar-thumb,
-.dash-shares-legend::-webkit-scrollbar-thumb,
 .dash-rev-h-chart::-webkit-scrollbar-thumb,
 .dash-attend-chart::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #22d3ee, #0891b2);
@@ -323,7 +319,23 @@
 .dash-cat-donut-hole span:first-child { font-size: 1.2rem; }
 .dash-cat-donut-total { font-size: 1.2rem; font-weight: 800; color: #a78bfa; }
 .dash-cat-donut-label { font-size: 0.55rem; color: #64748b; text-transform: uppercase; }
-.dash-cat-legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; max-height: var(--dash-h, 200px); overflow-y: auto; display: flex; flex-direction: column; gap: 0.35rem; }
+.dash-cat-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+  max-height: var(--dash-h, 200px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.dash-cat-legend::-webkit-scrollbar {
+  display: none; /* Webkit (Chrome, Safari, Edge) */
+}
 .dash-cat-legend-item {
   display: grid; grid-template-columns: 10px 1fr auto; gap: 0.45rem; align-items: center;
   padding: 0.3rem 0.45rem; border-radius: 6px; font-size: 0.72rem;
@@ -371,7 +383,23 @@
 .dash-shares-hole { width: 100px; height: 100px; border-radius: 50%; background: #0f172a; border: 2px solid rgba(96,165,250,0.3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
 .dash-shares-hole-total { font-size: 1.35rem; font-weight: 800; color: #60a5fa; }
 .dash-shares-hole-label { font-size: 0.58rem; color: #64748b; text-transform: uppercase; }
-.dash-shares-legend { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 0; max-height: var(--dash-h, 200px); overflow-y: auto; display: flex; flex-direction: column; gap: 0.4rem; }
+.dash-shares-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+  max-height: var(--dash-h, 200px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+.dash-shares-legend::-webkit-scrollbar {
+  display: none; /* Webkit (Chrome, Safari, Edge) */
+}
 .dash-shares-legend-item {
   display: grid; grid-template-columns: 10px 1fr auto; gap: 0.5rem; align-items: center;
   padding: 0.35rem 0.5rem; border-radius: 6px;
@@ -392,9 +420,9 @@
 .dash-rev-h-val { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.7rem; font-weight: 700; color: #d1fae5; }
 
 /* ── Category pie wedges (organizer) ──────────────────────────────── */
-.dash-pie-chart { display: flex; align-items: center; gap: 1.25rem; min-height: var(--dash-h, 200px); width: 100%; }
+.dash-pie-chart { display: flex; align-items: center; justify-content: center; gap: 2rem; min-height: var(--dash-h, 200px); width: 100%; }
 .dash-pie-svg { width: 140px; height: 140px; flex-shrink: 0; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.35)); }
-.dash-pie-legend { display: flex; flex-direction: column; gap: 0.45rem; flex: 1; min-width: 0; }
+.dash-pie-legend { display: flex; flex-direction: column; gap: 0.45rem; min-width: 0; }
 .dash-pie-legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: #94a3b8; padding: 0.25rem 0; }
 .dash-pie-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
 
@@ -440,3 +468,41 @@
 @media (max-width: 520px) {
   .dash-shares-chart, .dash-cat-donut-chart, .dash-pie-chart { flex-direction: column; align-items: stretch; }
 }
+
+/* Centering overrides specifically inside organizer popups/modals */
+.org-modal-real-chart .dash-pie-chart {
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3rem !important;
+  min-height: auto !important;
+}
+
+.org-modal-real-chart .dash-pie-legend {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+}
+
+.org-modal-real-chart .dash-pie-legend-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+}
+
+@media (max-width: 520px) {
+  .org-modal-real-chart .dash-pie-chart {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 1.5rem !important;
+  }
+  .org-modal-real-chart .dash-pie-legend {
+    align-items: center !important;
+  }
+  .org-modal-real-chart .dash-pie-legend-item {
+    justify-content: center !important;
+  }
+}
+
+

@@ -34,6 +34,13 @@ const Register = () => {
     const handleFormSubmit = async (values) => {
         setError('');
         try {
+            // Single-session role enforcement
+            const activeUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+            if (activeUser && activeUser.role === 'admin' && values.role !== 'admin') {
+                toast.error('An Admin session is active. Please log out of the Admin session before registering.');
+                return;
+            }
+
             const data = await authApi.register({
                 name: values.name,
                 email: values.email,
@@ -41,9 +48,14 @@ const Register = () => {
                 role: values.role
             });
 
-            dispatch(loginAction(data));
-            toast.success('Registration successful!');
-            navigate('/', { replace: true });
+            if (data.role === 'organizer') {
+                toast.success('Registration successful! Your account is pending admin approval.');
+                navigate('/login');
+            } else {
+                dispatch(loginAction(data));
+                toast.success('Registration successful!');
+                navigate('/', { replace: true });
+            }
         } catch (error) {
             const msg = error.response?.data?.message || 'Registration failed';
             setError(msg);

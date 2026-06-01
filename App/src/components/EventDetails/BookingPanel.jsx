@@ -11,7 +11,7 @@ const BookingPanel = ({ event, quantity, setQuantity, discountInfo, handleBook }
                 </div>
                 <div style={{ textAlign: 'right' }}>
                     <div className={styles.priceLabel}>Organizer</div>
-                    <div className={styles.organizerName}>{event.organizer?.name}</div>
+                    <div className={styles.organizerName}>{event.organizerName || event.organizerId?.name || 'Vibe Events'}</div>
                 </div>
             </div>
 

@@ -13,9 +13,9 @@ import OrgHistory from '../components/Organizer/OrgHistory';
 const TABS = ['Overview', 'My Events', 'History', 'Calendar', 'Analytics'];
 
 const Organizer = () => {
-  const userInfo = JSON.parse(sessionStorage.getItem('user'));
-  if (!userInfo) { window.location.href = '/login'; return null; }
-  if (userInfo.role !== 'organizer') { window.location.href = '/'; return null; }
+  const userInfo = JSON.parse(sessionStorage.getItem('user') || localStorage.getItem('user'));
+  if (!userInfo) { window.location.href = `${import.meta.env.BASE_URL}login`; return null; }
+  if (userInfo.role !== 'organizer') { window.location.href = import.meta.env.BASE_URL; return null; }
 
   const [activeTab, setActiveTab] = useState('Overview');
   const [events, setEvents] = useState([]);
@@ -46,15 +46,35 @@ const Organizer = () => {
     return () => clearInterval(iv);
   }, []);
 
-  const totalRevenue = useMemo(() => bookings.reduce((s, b) => s + (b.totalPrice || 0), 0), [bookings]);
+  const totalRevenue = useMemo(() => {
+    return bookings.reduce((s, b) => {
+      const ev = events.find(e => e._id.toString() === (b.event?._id || b.event || '').toString());
+      if (!ev) return s + (b.totalPrice || 0);
+      const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
+      const subtotal = unitPrice * b.quantity;
+      const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
+      const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
+      return s + (subtotal - savings);
+    }, 0);
+  }, [bookings, events]);
   const totalTickets = useMemo(() => bookings.reduce((s, b) => s + (b.quantity || 0), 0), [bookings]);
   const totalSeats = events.reduce((s, e) => s + (e.availableSeats || 0) + (bookings.filter(b => b.event?._id === e._id).reduce((a, b2) => a + b2.quantity, 0)), 0);
   const avgAttendance = totalSeats > 0 ? Math.round((totalTickets / totalSeats) * 100) : 0;
 
-  const revenueByEvent = useMemo(() => events.map(ev => ({
-    label: ev.title?.substring(0, 14),
-    revenue: bookings.filter(b => b.event?._id === ev._id).reduce((s, b) => s + (b.totalPrice || 0), 0),
-  })), [events, bookings]);
+  const revenueByEvent = useMemo(() => events.map(ev => {
+    const eventBookings = bookings.filter(b => (b.event?._id || b.event).toString() === ev._id.toString());
+    const eventRevenue = eventBookings.reduce((sum, b) => {
+      const unitPrice = b.ticketType === 'VVIP' ? (ev.vvipPrice || 0) : b.ticketType === 'VIP' ? (ev.vipPrice || 0) : (ev.price || 0);
+      const subtotal = unitPrice * b.quantity;
+      const hasDiscount = ev.offerDiscount > 0 && ev.offerMinTickets > 0 && b.quantity >= ev.offerMinTickets;
+      const savings = hasDiscount ? (subtotal * ev.offerDiscount) / 100 : 0;
+      return sum + (subtotal - savings);
+    }, 0);
+    return {
+      label: ev.title?.substring(0, 14),
+      revenue: eventRevenue,
+    };
+  }), [events, bookings]);
 
   const ticketsByEvent = useMemo(() => events.map(ev => ({
     label: ev.title?.substring(0, 14),

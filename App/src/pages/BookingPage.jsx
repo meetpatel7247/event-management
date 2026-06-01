@@ -65,6 +65,11 @@ const BookingPage = () => {
     useEffect(() => {
         if (!bookingEvent && !bookingSuccess) {
             navigate('/');
+            return;
+        }
+        if (bookingEvent && !bookingEvent.isApproved && !bookingSuccess) {
+            toast.error('Booking is disabled for pending events.');
+            navigate('/');
         }
     }, [bookingEvent, bookingSuccess, navigate]);
 

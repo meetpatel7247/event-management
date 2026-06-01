@@ -20,28 +20,27 @@ const Support = () => {
                 event questions, or just saying hello, we've got you covered.
             </p>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '2.5rem',
-                width: '100%',
-                maxWidth: '1000px',
-                marginBottom: '4rem'
-            }}>
-                <div className="glass-card" style={{ padding: '2.5rem' }}>
+            <div className="responsive-grid" style={{ width: '100%', maxWidth: '1000px', marginBottom: '4rem' }}>
+                <div className="glass-card">
                     <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Email Us</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>For detailed inquiries and complex issues.</p>
-                    <a href="mailto:support@devitevent.com" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>support@devitevent.com</a>
+                    <div style={{ marginTop: 'auto' }}>
+                        <a href="mailto:support@devitevent.com" style={{ color: 'var(--primary-color)', fontWeight: 'bold', wordBreak: 'break-all' }}>support@devitevent.com</a>
+                    </div>
                 </div>
-                <div className="glass-card" style={{ padding: '2.5rem' }}>
+                <div className="glass-card">
                     <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Call Us</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Mon-Fri, 9am - 6pm EST for technical support.</p>
-                    <a href="tel:+10000000000" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>+1 (800) EVENT-HELP</a>
+                    <div style={{ marginTop: 'auto' }}>
+                        <a href="tel:+10000000000" style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>+1 (800) EVENT-HELP</a>
+                    </div>
                 </div>
-                <div className="glass-card" style={{ padding: '2.5rem' }}>
+                <div className="glass-card">
                     <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem' }}>Live Chat</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Connect with an expert agent in seconds.</p>
-                    <button className="premium-button" style={{ padding: '0.8rem 1.5rem', width: 'auto' }}>Start Chat</button>
+                    <div style={{ marginTop: 'auto', width: '100%' }}>
+                        <button className="premium-button" style={{ padding: '0.8rem 1.5rem', width: '100%' }}>Start Chat</button>
+                    </div>
                 </div>
             </div>
 

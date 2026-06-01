@@ -19,19 +19,12 @@ const Corporates = () => {
                 Unlock exclusive corporate perks, bulk booking discounts, and tailored event experiences for your entire workforce.
             </p>
 
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
-                gap: '3rem',
-                width: '100%',
-                maxWidth: '1200px',
-                marginBottom: '5rem'
-            }}>
-                <div className="glass-card" style={{ padding: '3rem' }}>
+            <div className="responsive-grid" style={{ width: '100%', maxWidth: '1200px', marginBottom: '5rem' }}>
+                <div className="glass-card">
                     <h3 style={{ marginBottom: '1.2rem', fontSize: '1.8rem' }}>Bulk Bookings</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Special rates for companies and organizations booking multiple events at once.</p>
                 </div>
-                <div className="glass-card" style={{ padding: '3rem' }}>
+                <div className="glass-card">
                     <h3 style={{ marginBottom: '1.2rem', fontSize: '1.8rem' }}>Tailored Events</h3>
                     <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Bespoke event planning and management for high-profile business gatherings.</p>
                 </div>

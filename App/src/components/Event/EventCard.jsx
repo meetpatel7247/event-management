@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setBookingDetails } from '../../store/bookingSlice';
 import withFadeIn from '../../hoc/withFadeIn';
 import { eventApi } from '../../utils/api';
+import { toast } from 'react-toastify';
 import styles from './EventCard.module.css';
 
 /**
@@ -125,16 +126,22 @@ const EventCard = ({ event, isGrid = false }) => {
         e.stopPropagation();
         const appBase = import.meta.env.VITE_APP_URL || window.location.origin;
         const shareUrl = `${appBase}/event/${event._id}`;
-        const shareData = {
-            title: event.title,
-            text: `Check out this event: ${event.title} on ${new Date(event.date).toLocaleDateString()}`,
-            url: shareUrl,
-        };
+        const formattedMessage = `Hi Sir/Madam,
+
+Please find the event details below:
+
+${shareUrl}
+
+Thank you.`;
+
         try {
             if (navigator.share) {
-                await navigator.share(shareData);
+                await navigator.share({
+                    title: event.title,
+                    text: formattedMessage,
+                });
             } else {
-                await navigator.clipboard.writeText(shareUrl);
+                await navigator.clipboard.writeText(formattedMessage);
                 setShareCopied(true);
                 setTimeout(() => setShareCopied(false), 2000);
             }
@@ -200,8 +207,9 @@ const EventCard = ({ event, isGrid = false }) => {
                         title={`Share (${shareCount})`}
                         aria-label="Share event"
                     >
-                        {shareCopied ? '✅' : '🔗'}
-                        {shareCount > 0 && <span className={styles.actionCount}>{shareCount}</span>}
+                        <span className={styles.actionRing} />
+                        <span className={styles.actionIcon}>{shareCopied ? '✅' : '🔗'}</span>
+                        <span className={`${styles.actionCount} ${shareCopied ? styles.actionCountGreen : ''}`}>{shareCount}</span>
                     </button>
 
                     {/* Like */}
@@ -211,8 +219,9 @@ const EventCard = ({ event, isGrid = false }) => {
                         title={liked ? 'Unlike' : 'Like this event'}
                         aria-label={liked ? 'Unlike event' : 'Like event'}
                     >
-                        {liked ? '❤️' : '🤍'}
-                        {likeCount > 0 && <span className={styles.actionCount}>{likeCount}</span>}
+                        <span className={`${styles.actionRing} ${liked ? styles.actionRingActive : ''}`} />
+                        <span className={`${styles.actionIcon} ${likeBounce ? styles.bounce : ''}`}>{liked ? '❤️' : '🤍'}</span>
+                        <span className={`${styles.actionCount} ${liked ? styles.actionCountPink : ''}`}>{likeCount}</span>
                     </button>
                 </div>
             </div>
@@ -243,12 +252,31 @@ const EventCard = ({ event, isGrid = false }) => {
                     <div className={styles.price}>
                         ₹{event.price}
                     </div>
-                    <button
-                        className={`premium-button ${styles.bookBtn}`}
-                        onClick={handleBook}
-                    >
-                        Book Ticket
-                    </button>
+                    {event.isApproved ? (
+                        <button
+                            className={`premium-button ${styles.bookBtn}`}
+                            onClick={handleBook}
+                        >
+                            Book Ticket
+                        </button>
+                    ) : (
+                        <button
+                            className={`premium-button ${styles.bookBtn}`}
+                            style={{
+                                background: 'rgba(245, 158, 11, 0.1)',
+                                border: '1px solid rgba(245, 158, 11, 0.3)',
+                                color: '#f59e0b',
+                                cursor: 'not-allowed'
+                            }}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                toast.info('Booking is disabled for pending events.');
+                            }}
+                            disabled
+                        >
+                            Pending Approval
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

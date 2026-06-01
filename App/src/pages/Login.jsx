@@ -39,6 +39,15 @@ const Login = () => {
         setLoading(true);
         try {
             const data = await authApi.login(formData.email, formData.password);
+            
+            // Single-session role enforcement
+            const activeUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+            if (activeUser && activeUser.role === 'admin' && data.role !== 'admin') {
+                toast.error('An Admin session is active. Please log out of the Admin session before signing in.');
+                setLoading(false);
+                return;
+            }
+
             dispatch(loginAction(data));
             toast.success(`Welcome back, ${data.name}!`);
             navigate(data.role === 'admin' ? '/admin' : data.role === 'organizer' ? '/organizer' : '/', { replace: true });
