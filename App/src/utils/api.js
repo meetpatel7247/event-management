@@ -134,6 +134,11 @@ export const adminApi = {
     const response = await api.delete('/bookings/reset');
     return response.data;
   },
+  /** Admin: zero all likes/shares and clear wishlists */
+  resetEngagement: async () => {
+    const response = await api.delete('/events/reset-engagement');
+    return response.data;
+  },
 };
 
 export const userApi = {

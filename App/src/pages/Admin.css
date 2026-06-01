@@ -52,6 +52,14 @@
 }
 .adm-subtitle { color: #64748b; margin: 0; font-size: 0.95rem; }
 
+.adm-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
 /* Reset button */
 .adm-reset-btn {
   display: flex;
@@ -80,6 +88,18 @@
 .adm-reset-btn:active {
   transform: translateY(0);
   box-shadow: none;
+}
+
+.adm-reset-btn--engagement {
+  border-color: rgba(251, 113, 133, 0.45);
+  background: rgba(251, 113, 133, 0.12);
+  color: #fda4af;
+}
+.adm-reset-btn--engagement:hover {
+  background: rgba(251, 113, 133, 0.22);
+  border-color: rgba(251, 113, 133, 0.65);
+  color: #fecdd3;
+  box-shadow: 0 6px 18px -6px rgba(251, 113, 133, 0.35);
 }
 
 /* ── Tabs ────────────────────────────────────────────────────────── */

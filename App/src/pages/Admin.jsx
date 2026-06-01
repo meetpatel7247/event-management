@@ -154,11 +154,26 @@ const Admin = () => {
   };
 
   const handleResetData = async () => {
+    if (!window.confirm('Delete ALL bookings and restore event seat counts? This cannot be undone.')) return;
     try {
       await adminApi.resetBookings();
       toast.success('✅ All ticket data reset successfully!');
       refresh(false);
     } catch (e) { toast.error(e.response?.data?.message || 'Reset failed'); }
+  };
+
+  const handleResetEngagement = async () => {
+    if (!window.confirm('Reset ALL likes, shares, and wishlists to zero? This cannot be undone.')) return;
+    try {
+      await adminApi.resetEngagement();
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('liked_')) localStorage.removeItem(key);
+      });
+      toast.success('✅ All likes and shares reset successfully!');
+      refresh(false);
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Reset likes/shares failed');
+    }
   };
 
 
@@ -192,13 +207,24 @@ const Admin = () => {
           <h1 className="adm-title">Admin Panel</h1>
           <p className="adm-subtitle">Manage platform operations and user activities</p>
         </div>
-        <button
-          className="adm-reset-btn"
-          onClick={handleResetData}
-          title="Delete all bookings and restore event seat counts"
-        >
-          🗑️ Reset Ticket Data
-        </button>
+        <div className="adm-header-actions">
+          <button
+            type="button"
+            className="adm-reset-btn adm-reset-btn--engagement"
+            onClick={handleResetEngagement}
+            title="Set all event likes and shares to 0 and clear wishlists"
+          >
+            ♻️ Reset Likes & Shares
+          </button>
+          <button
+            type="button"
+            className="adm-reset-btn"
+            onClick={handleResetData}
+            title="Delete all bookings and restore event seat counts"
+          >
+            🗑️ Reset Ticket Data
+          </button>
+        </div>
       </div>
 
       {/* TABS */}

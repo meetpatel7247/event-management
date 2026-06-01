@@ -301,6 +301,22 @@ async function recordShare(req, res, next) {
   }
 }
 
+/** Admin only — set all event likes/shares to 0 and clear all wishlists */
+async function resetEngagement(req, res, next) {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin access required' });
+    }
+    const result = await eventService.resetAllEngagement();
+    res.json({
+      message: 'All likes, shares, and wishlists have been reset.',
+      ...result,
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getEvents,
   getMyEvents,
@@ -310,5 +326,6 @@ module.exports = {
   deleteEvent,
   toggleLike,
   recordShare,
+  resetEngagement,
 };
 
